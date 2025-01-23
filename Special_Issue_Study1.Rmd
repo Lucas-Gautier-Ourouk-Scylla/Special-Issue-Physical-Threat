@@ -1,0 +1,660 @@
+---
+title: "Threat_Special_Issue_Study1"
+author: "Gautier Lucas O.S."
+date: "2025-01-22"
+bibliography: [bibliography.bib, book.bib, packages.bib]
+link-citations: yes
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r Package loading-Exp1, include = FALSE}
+
+rm(list=ls()) # Clear the environment
+
+require(pacman)
+
+p_load(tinytex, knitr, kableExtra, readr, dplyr, tidyverse, Hmisc, mada, party, pdp, psych, lmerTest, mice, VIM, missForest, lavaan, semPlot, lattice, sjPlot, sjtable2df, broom.mixed, performance, insight, MVN, ggplot2, rsq, viridis, hrbrthemes)
+
+load("EnvironmentSaving/Part1_Menace/Task_Catego_2025-01-10.RData")
+
+load("EnvironmentSaving/Part1_Menace/Survey_Analysis_Catego_2024-10-08.RData")
+
+# Load Model Comparison for RT
+load(file = c("EnvironmentSaving/Part1_Menace/Model_Comparison/Catego_Comp_Model_1.RData"))
+load(file = c("EnvironmentSaving/Part1_Menace/Model_Comparison/Catego_Comp_Model_2.RData"))
+load(file = c("EnvironmentSaving/Part1_Menace/Model_Comparison/Catego_Comp_Model_3.RData"))
+load(file = c("EnvironmentSaving/Part1_Menace/Model_Comparison/Catego_Comp_Model_4.RData"))
+
+load(file = c("EnvironmentSaving/Part1_Menace/Model_Comparison/Catego_Models/RT_ModComp02_Item.RData"))
+load(file = c("EnvironmentSaving/Part1_Menace/Model_Comparison/Catego_Models/RT_ModComp02.RData"))
+
+rounding2 <- function(r){
+  round(r, digits = 2) 
+}
+
+rounding0 <- function(r){
+  round(r, digits = 0) 
+}
+
+pValue <- function(p){
+  ifelse((p)<= 0.001 ,"< 0.001", 
+         ifelse((p)<= 0.01 ,"< 0.01", 
+                paste0("= ", round((p), digit = 3))))
+}
+
+```
+
+## Method 
+
+### Population 
+
+The sample size for this experiment was calculated based on a study by Normand et al. [@normandDoesEvaluativePressure2014]. Based on the unstandardized effect size from this study (i.e., -4.88 ms), a statistical power of 95%, and an α = 0.05, the a priori calculated sample size was *N* = 250 participants. Details of the power calculation and associated R scripts are available in the preregistration of this study (<https://osf.io/nhxub>), and in the supplementary.
+
+The total sample for this study consists of *N* = `r (nlevels(factor(df_Categorization_Full$response_id)))` french participants recruited via the *CrowdPanel* platform and compensated for their participation. Due to issues with the sound calibration on their computers, *n* = `r (nlevels(N_No_Sound$response_id))` participants were removed from the final dataset. Thus, the final sample for this study consists of *N* = `r (nlevels(df_Catego$response_id))`, including `r table(df_Survey_Wide_Catego$Gender_str)[["Woman"]]` women, `r table(df_Survey_Wide_Catego$Gender_str)[["Man"]]` men, and `r table(df_Survey_Wide_Catego$Gender_str)[["NoBinary"]]` non-binary individuals (*Mean*~Age~ = `r rounding2(mean(df_Survey_Wide_Catego$Age))`, *SD*~Age~ = `r rounding2(sd(df_Survey_Wide_Catego$Age))`, *min* = `r min(df_Survey_Wide_Catego$Age)`, *max* = `r max(df_Survey_Wide_Catego$Age)`). A large proportion of participants report occupations as employees (*n* = `r table(df_Survey_Wide_Catego$CSP_str)[["Employee"]]`), intellectual professions (*n* = `r table(df_Survey_Wide_Catego$CSP_str)[["IntellectualProfession"]]`), or intermediate professions  (*n* = `r table(df_Survey_Wide_Catego$CSP_str)[["IntermediateProfession"]]`).
+
+### Material 
+
+#### Spatial cueing task
+
+The primary task in this study is a spatial cueing task similar to the one used in Folk and Remington's study on the contingent capture hypothesis [@folkInvoluntaryCovertOrienting1992; @folkSelectivityDistractionIrrelevant1998]. During each trial of the task, a colored target (i.e., green or red) appears at one of four possible locations on the target screen. The target locations are marked by placeholders arranged in a cross pattern at the top, bottom, right, and left of the screen. These placeholders are white-outlined squares that contrast sharply with the black background. Based on a screen dimension of 800 x 600 pixels, the placeholders have a side length of 74 pixels, and their centers are located 250 pixels away from the central fixation point. Since the study is conducted online and participants do not all have standardized computer screens, this experiment is programmed based on a target screen with dimensions of 800 x 600 pixels. The stimulus presentation screens then automatically adjust to the participants' actual screen size. The fixation point is a white square with a side length of 22 pixels displayed in the center of the screen.
+
+In a counterbalanced manner following a between-subjects design, the target is either green or red. On each trial, the target (i.e., 30 pixels) — corresponding either to the letter *X* or the symbol *=* — is flashed on the screen for 50 ms in one of the four placeholders. Three additional symbols, *X* and *=*, are simultaneously flashed in white at the center of the other placeholders so that each target screen always contains two *X* letters and two *=* symbols. Participants are instructed to press the *B* key when the colored target is an *X* and the *N* key if it is an *=*.
+
+In accordance with Posner's spatial cueing paradigm [@posnerOrientingAttention1980], a distractor cue is flashed a few milliseconds before the target to capture involuntarily participants' attention. In this study, the cue consists of four dots (i.e., 12 pixels) appearing above, below, or on the sides of each placeholder (see Figure \@ref(fig:SpatialCueingDisplay)). The task consists of three trial types based on the characteristics of the distractor cue. In *Neutral* trials, all cues appear in white so that no specific location is prioritized. In *Congruent* and *Incongruent* trials, one of the cues appears respectively in the same color as the target or in a different color. Thus, when participants need to locate a green target, a congruent cue corresponds to four green dots appearing around one of the placeholders, while an incongruent cue consists of the same dots appearing in red. When the cue is colored, it can also appear at the same location as the target (*valid* cue) or at a different location (*invalid* cue).
+
+
+A trial begins with a fixation screen displayed for 500 ms, preceding the appearance of the four placeholders indicating the possible target locations. The duration of this screen is randomly selected from five SOAs (i.e., 1000, 1100, 1200, 1300, or 1400 ms) to limit systematic responses from participants. After this delay, the cueing screen is flashed for 50 ms. The target screen, composed of the colored target and the three other white stimuli, appears 100 ms later for a duration of 50 ms. Participants have 1500 ms to respond to the task, after which a new trial is automatically triggered. This new trial begins 500 ms after participants' response or their lack of response.
+
+In each block of the spatial cueing task, one-third of the trials (*k* = 48 trials) are *Neutral* trials containing no colored cue, while the remaining trials are evenly distributed between *Congruent* trials (*k* = 48 trials) and *Incongruent* trials (*k* = 48 trials) in which the colored cue matches or differs from the target color, respectively. In these two trial types, the location of the cue is *Valid* in 25% of trials (*k* = 12 trials) and *Invalid* in 75% of trials (*k* = 36 trials). In this way, the distractor cue is always considered irrelevant because it does not predict target location. In this study, participants have to perform the spatial cueing task with a compound search instruction [@duncanVisualSearchVisual1985]. The task for participants is not only to identify the location of the colored target (as in a simple search instruction) but also to categorize this target as either an *X* or an *=* (see the [Supplementary](#Compound-Instructions) for clarifications).
+
+
+```{r SpatialCueingDisplay, fig.cap = "(ref:Title-SpatialCueingDisplay)", fig.align = 'center', echo=FALSE}
+knitr::include_graphics("Images/Calibration_Menace/Spatial_Cueing_Display.png")
+
+```
+
+(ref:Title-SpatialCueingDisplay) **Decomposition of a trial from the Spatial Cueing Task**. In this figure, the participant's task is to indicate as accurately and quickly as possible whether the green target corresponds to the letter *X* or the symbol *=*. The trial depicted corresponds to a trial in which the distractor cue is Congruent with the target (i.e., green in color) and appears in a Valid location (i.e., at the same location as the target).
+
+
+#### Experimental manipulations
+
+The Threat of Screams paradigm is used to manupulate threat during task completion [@beaurenautThreatScreamParadigm2020]. In the *Threat* condition, distressing human screams are heard regularly to maintain an anxious arousal state throughout an entire block of trials. Screams occur randomly 24 times during the block (i.e., 16% of trials). To limit the competition between auditory and visual stimuli, the screams always occur during the fixation screen. For each trial in which a scream occurs, it is randomly selected from a set of 3 male and 3 female screams. All the sounds have undergone prior validation [@fecteauJudgmentEmotionalNonlinguistic2005] and are available upon request by adhering to certain usage clauses (see on OSF: <https://osf.io/cx6ju?view_only=4a4fda675e8d41f7bf20a9033f013a6f>). To ensure that the effect of threat on attentional priorities is due to anxious arousal and not just to the uncertainty associated with the occurrence of the auditory stimuli, a block of trials has been added in which non-aversive sounds are heard. In the *Vocalize* condition, human vocalizations are heard randomly during the main task, similar to the distressing screams in the *Threat* condition. These vocalizations were recorded by us, and their volume was calibrated to match that of the screams. Like the screams, these sounds consist of 3 male and 3 female vocalizations, randomly selected during the block of trials. In the *Control* condition, participants are informed that no sound will be heard throughout the entire block of trials.
+
+
+#### Anxiety-induced measure 
+
+```{r Etude1-Fiabilité-Echelle-Anxiété, include = FALSE}
+
+# Cronbach alpha of anxiety scale at pretest
+dt1_Factor_5items <- df_Survey_Wide_Catego %>%
+  select(Calm_Recod_Pretest, Anxious_pretest, Nervous_pretest, Tense_pretest, Stressed_pretest)
+
+Etude1_Cronbach_Anxiety_Ptetest <- ltm::cronbach.alpha(dt1_Factor_5items, na.rm=T) # Cronbach's alpha
+
+
+# Factorial analysis of anxiety scale at pretest
+dt1_Factor_8items <- df_Survey_Wide_Catego %>%
+  select(Angry_pretest, Calm_Recod_Pretest, Anxious_pretest, Nervous_pretest, Happy_pretest, Tense_pretest, Stressed_pretest, Depressed_pretest)
+
+EFA_dt1 <- factanal(dt1_Factor_8items, factors=2, rotation = "promax") # Factorial anysis
+# print(EFA_dt1, digits = 2, cutoff = .00)
+
+# Save only relevant values from factor analysis
+EFA_dt1_loadings <- EFA_dt1[["loadings"]][c("Anxious_pretest", "Nervous_pretest", "Tense_pretest", "Stressed_pretest"),"Factor1"]
+
+```
+
+The level of anxiety experienced by participants is measured at the beginning of the experiment and at the end of each block of the spatial cueing task using an 8-item scale (including 3 distractor items) translated and adapted from a study by Lee and Tech [@leeAttentionalBiasesSocial2008]. For each item, participants indicate their level of agreement with statements such as "*Currently, I feel nervous*" on a 7-point Likert scale (i.e., `1 = Strongly disagree` ; `7 = Strongly agree`). The responses to the five critical items (Cronbach's alpha = `r rounding2(Etude1_Cronbach_Anxiety_Ptetest[["alpha"]])`) are used to calculate a composite anxiety score, indicating to what extent participants feel: `anxious`, `tense`, `jittery`, `nervous`, `rested` (distractor items are `angry`, `happy`, `despondent`). However, the item `rested` was excluded from the calculation of this composite score because it had a relatively low loading with other items.
+
+The final anxiety score corresponds to a mean score^[Contrary to our pre-registration, we performed our analyses using a composite mean score of self-reported anxiety rather than a factorial composite score using Bartlett's method [which aims to minimize the sum of squared standard errors compared to a simple mean,  @bartlettStatisticalConceptionMental1937; @yuanFittingDataModel2010; @yungBartlettFactorScores2013]. The mean scores facilitate the understanding and interpretation of the analyses.]. An anxiety evolution score was then calculated by subtracting the anxiety measured at the beginning of the experiment from the anxiety score measured after each experimental block. A high anxiety evolution score thus reflects an increase in anxiety following an experimental block compared to the beginning of the experiment.
+
+
+#### Post-Traumatic Stress Disorder measure
+
+```{r Etude1-Fiabilité-Echelle-TSPT, include = FALSE}
+
+# Cronbach alpha of anxiety scale at pretest
+dt1_Factor_TSPT <- df_Survey_Wide_Catego %>%
+  select(PTSD1 : PTSD17)
+
+Etude1_Cronbach_TSPT <- ltm::cronbach.alpha(dt1_Factor_TSPT, na.rm=T) # Cronbach's alpha
+```
+
+The occurrence of distressing human screams during the experiment may elicit strong reactions in participants with Post-Traumatic Stress Disorder [*PTSD*, @beaurenautThreatScreamParadigm2020]. Therefore, participants were invited, at the start of the experiment, to complete a self-reported measure of PTSD symptoms [*The PTSD Checklist*, @ventureyraValidationPosttraumaticStress2001]. In this scale, participants were asked to report the extent to which they had experienced symptoms characteristic of stressful life events over the past month (i.e., `0 = Not at all` ; `4 = Very often`; Cronbach's alpha = `r rounding2(Etude1_Cronbach_TSPT[["alpha"]])`). If the total PTSD score (i.e., the sum of the 17 items) was greater than 44, a warning message appeared to remind participants of the potentially stressful nature of the ongoing study (*n* = `r table(df_Survey_Wide_Catego$PTSD_Diag)[["Diag"]]` participants).
+
+
+### Procedure
+
+This study was programmed using the Psytoolkit experiment programming software [@stoetPsyToolkitNovelWebBased2017; @stoetPsyToolkitSoftwarePackage2010]. 
+After reading the participation consent form, participants began by filling out the PTSD symptom checklist.
+In accordance with the ethical agreement related to this study, participants with scores above the diagnostic threshold for PTSD (i.e., 44) were once again informed of the potential stressfulness of this study. 
+They were also reminded that they could leave the experiment at any time.
+After this information, all participants completed an initial self-reported anxiety measure.
+
+
+After completing this scale, participants underwent a sound calibration phase for their computer. 
+This phase was designed to ensure that participants could hear the sounds during the main task at a subjective level considered to be "unpleasant." 
+During this phase, participants were first instructed to lower their computer's volume. 
+Then, they were asked to play a sound and gradually increase the volume on their computer.
+Participants who were unable to hear the sound during the calibration phase (*n* = `r (nlevels(N_No_Sound$response_id))`) immediately concluded the study by completing the demographic part. 
+The calibration phase ended when participants judged that the sound was at an "unpleasant but not painful" level. 
+Once this threshold was reached, participants could start the spatial cueing task.
+
+
+The spatial cueing task began with 20 practice trials during which feedback informed participants about the accuracy of their responses. 
+Such feedback was no longer provided after this practice block. 
+The experimental task consisted of 3 blocks of 144 trials in which participants had to categorize the target as either an *X* or an *=*.
+For half of the participants, the target was red (*n* = `r table(df_Survey_Wide_Catego$Target_Color)[["red"]]`), while it was green for the other half (*n* = `r table(df_Survey_Wide_Catego$Target_Color)[["green"]]`).
+All participants completed the task in the *Control*, *Threat*, and *Vocalize* conditions, in a counterbalanced order to control for potential training effects.
+At the end of each block, participants completed the self-reported anxiety scale, indicating the extent to which they had experienced anxiety during the previous block. 
+They were then given the option to take a brief rest before starting a new block of trials.
+
+
+After completing the 3 experimental blocks, participants answered a few additional questions using a dichotomous scale ("Yes" or "No"): whether they had heard sounds during the experiment; whether they found the sounds personally unpleasant; and whether they had adjusted the volume of their computer after the sound calibration phase. 
+These questions were designed to allow us to exclude some participants from the study, in accordance with our pre-registration^[In this study, some participants reported hearing the sounds at a level they did not find unpleasant (*n* = `r table(df_Survey_Wide_Catego$Check_Uncomfort)[["2"]]`, i.e., `r rounding2(table(df_Survey_Wide_Catego$Check_Uncomfort)[["2"]]/nlevels(df_Catego$response_id))`%), or reported adjusting their computer volume after the calibration phase (*n* = `r table(df_Survey_Wide_Catego$Check_Volume)[["1"]]`, i.e., `r rounding2(table(df_Survey_Wide_Catego$Check_Volume)[["1"]]/nlevels(df_Catego$response_id))`%). The analyses reported in the Results section include data from all participants who reported hearing sounds during the task (i.e., *n* = `r nlevels(df_Catego$response_id)`.].
+Participants were then asked to rate their agreement with 2x2 items measuring the perceived threat from the screams and vocalizations, using a 10-point scale (i.e., `1 = Not at all`, `10 = Extremely`; e.g., "*The screams (vs. the vocalizations) I heard during the experiment were threatening*" and "*I felt concerned about the possibility of hearing screams (vs. vocalizations) during the task*"). Composite scores for the threatening nature of the screams and vocalizations were calculated by averaging each participant's scores on these two items.
+
+
+Finally, participants completed a few demographic questions (i.e., their subjective social status, measured using the MacArthur scale [@adlerRelationshipSubjectiveObjective2000]; the highest level of education achieved; their occupation; gender; age; city and country of residence) before being debriefed about the actual objectives of the experiment. During the debriefing, particular care was taken to minimize any negative effects of anxiety at the end of the experiment (i.e., potentially induced by the occurrence of distress screams in the *Threat* condition), and relaxation exercises were offered.
+
+All material for this study is available on OSF (<https://osf.io/jkt9m/>).
+
+
+## Results 
+
+### Effectiveness of experimental manipulations
+
+#### Anxiety induction
+
+To verify the effectiveness of the experimental induction, we tested whether anxiety was higher after the experimental blocks compared to the initial anxiety measure. 
+A linear regression reveals that self-reported anxiety increases significantly between the initial measure and the *Threat* block (*b* =
+`r round(Report_Evol_lm01_Catego$coefficients[1,1], digits = 2)`,
+*F*(`r Report_Evol_lm01_Catego$df[1]`, `r Report_Evol_lm01_Catego$df[2]`) =
+`r round(Report_Evol_lm01_Catego$coefficients[1,3], digits = 2)`, *p* 
+`r ifelse((Report_Evol_lm01_Catego$coefficients[1,4])<= 0.001 ,"< 0.001", ifelse((Report_Evol_lm01_Catego$coefficients[1,4])<= 0.01 ,"< 0.01", paste0("= ", round((Report_Evol_lm01_Catego$coefficients[1,4]), digit = 2))))`). 
+According to this analysis, the occurrence of distressing screams during the main task is effective in triggering anxiety in participants. 
+However, a significant increase was also found in both the *Control* and *Vocalize* blocks (respectively *b* =
+`r round(Report_Evol_lm02_Catego$coefficients[1,1], digits = 2)`,
+*F*(`r Report_Evol_lm02_Catego$df[1]`, `r Report_Evol_lm02_Catego$df[2]`) =
+`r round(Report_Evol_lm02_Catego$coefficients[1,3], digits = 2)`, *p* 
+`r ifelse((Report_Evol_lm02_Catego$coefficients[1,4])<= 0.001 ,"< 0.001", ifelse((Report_Evol_lm02_Catego$coefficients[1,4])<= 0.01 ,"< 0.01", paste0("= ", round((Report_Evol_lm02_Catego$coefficients[1,4]), digit = 2))))` et *b* =
+`r round(Report_Evol_lm03_Catego$coefficients[1,1], digits = 2)`,
+*F*(`r Report_Evol_lm03_Catego$df[1]`, `r Report_Evol_lm03_Catego$df[2]`) =
+`r round(Report_Evol_lm03_Catego$coefficients[1,3], digits = 2)`, *p* 
+`r ifelse((Report_Evol_lm03_Catego$coefficients[1,4])<= 0.001 ,"< 0.001", ifelse((Report_Evol_lm03_Catego$coefficients[1,4])<= 0.01 ,"< 0.01", paste0("= ", round((Report_Evol_lm03_Catego$coefficients[1,4]), digit = 2))))`).
+
+To clarify this effect, mixed-model analyses show that participants report a significantly higher increase in anxiety in the *Threat* block (*M* =
+`r round(Anxiety_table_Catego[[3,"Mean"]], digit = 2)`, *ET* =
+`r round(Anxiety_table_Catego[[3,"SD"]], digit = 2)`) than in the *Control* bloc (*M* =
+`r round(Anxiety_table_Catego[[1,"Mean"]], digit = 2)`, *ET* =
+`r round(Anxiety_table_Catego[[1,"SD"]], digit = 2)`, *b* = `r round(coefs_Fear_lmer01_Catego["BlockThreat", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(Fear_lmer01_Catego, type = "ml1")[["BlockThreat"]], digit =0)`) =
+`r round(coefs_Fear_lmer01_Catego["BlockThreat", "t.value"], digits = 2)`, *p* `r ifelse((coefs_Fear_lmer01_Catego["BlockThreat", "Pr...t.."])<= 0.001 ,"< 0.001", ifelse((coefs_Fear_lmer01_Catego["BlockThreat", "Pr...t.."])<= 0.01 ,"< 0.01", paste0("= ", round((coefs_Fear_lmer01_Catego["BlockThreat", "Pr...t.."]), digit = 3))))`). 
+They also report a greater increase in self-reported anxiety after the *Threat* block than after the *Vocalize* block (*M* =
+`r round(Anxiety_table_Catego[[4,"Mean"]], digit = 2)`, *ET* =
+`r round(Anxiety_table_Catego[[4,"SD"]], digit = 2)`, *b* = `r round(coefs_Fear_lmer02_Catego["BlockToon", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(Fear_lmer02_Catego, type = "ml1")[["BlockToon"]], digit =0)`) =
+`r round(coefs_Fear_lmer02_Catego["BlockToon", "t.value"], digits = 2)`, *p* `r ifelse((coefs_Fear_lmer02_Catego["BlockToon", "Pr...t.."])<= 0.001 ,"< 0.001", ifelse((coefs_Fear_lmer02_Catego["BlockToon", "Pr...t.."])<= 0.01 ,"< 0.01", paste0("= ", round((coefs_Fear_lmer02_Catego["BlockToon", "Pr...t.."]), digit = 3))))`). 
+No significant difference is found between the *Control* and *Vocalize* blocks regarding the increase in anxiety following the initial measurement (*b* = `r round(coefs_Fear_lmer01_Catego["BlockToon", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(Fear_lmer01_Catego, type = "ml1")[["BlockToon"]], digit =0)`) =
+`r round(coefs_Fear_lmer01_Catego["BlockToon", "t.value"], digits = 2)`, *p* `r ifelse((coefs_Fear_lmer01_Catego["BlockToon", "Pr...t.."])<= 0.001 ,"< 0.001", ifelse((coefs_Fear_lmer01_Catego["BlockToon", "Pr...t.."])<= 0.01 ,"< 0.01", paste0("= ", round((coefs_Fear_lmer01_Catego["BlockToon", "Pr...t.."]), digit = 3))))`).
+
+
+#### Threatening nature of screams
+
+We also tested whether the distressing screams were perceived by participants as more threatening than the vocalizations. 
+A paired-sample linear regression reveals that participants assess the screams as significantly more threatening (*M* =
+`r round(mean(df_Survey_Wide_Catego$Threat_Scream_Mean), digit = 2)`, *ET* =
+`r round(sd(df_Survey_Wide_Catego$Threat_Scream_Mean), digit = 2)`) than the vocalizations (*M* =
+`r round(mean(df_Survey_Wide_Catego$Threat_Vocal_Mean), digit = 2)`, *ET* =
+`r round(sd(df_Survey_Wide_Catego$Threat_Vocal_Mean), digit = 2)`, *b* =
+`r round(Report_Threatening_Sounds_Catego$coefficients[1,1], digits = 2)`,
+*F*(`r Report_Threatening_Sounds_Catego$df[1]`, `r Report_Threatening_Sounds_Catego$df[2]`) =
+`r round(Report_Threatening_Sounds_Catego$coefficients[1,3], digits = 2)`, *p* `r pValue(Report_Threatening_Sounds_Catego$coefficients[1,4])`).
+
+Linear regression analyses further show that the threatening nature of the screams significantly predicts the increase in self-reported anxiety following the *Threat* block (*b* = `r round(Report_Anxiety_Screams_lmMean_Catego$coefficients[2,1], digits = 2)`,
+*F*(`r Report_Anxiety_Screams_lmMean_Catego$df[1]-Report_Anxiety_Screams_lmMean_Catego[["fstatistic"]][["numdf"]]`, `r Report_Anxiety_Screams_lmMean_Catego$df[2]`) =
+`r round(Report_Anxiety_Screams_lmMean_Catego$coefficients[2,3], digits = 2)`, *p* `r pValue(Report_Anxiety_Screams_lmMean_Catego$coefficients[2,4])`, η² = `r round(rsq(Anxiety_Screams_lmMean_Catego), digit = 3)`). 
+Similarly, the threatening nature of the vocalizations significantly predicts the increase in self-reported anxiety in the *Vocalize* block (*b* = `r round(Report_Anxiety_Vocaliz_lmMean_Catego$coefficients[2,1], digits = 2)`,
+*F*(`r Report_Anxiety_Vocaliz_lmMean_Catego$df[1]-Report_Anxiety_Vocaliz_lmMean_Catego[["fstatistic"]][["numdf"]]`, `r Report_Anxiety_Vocaliz_lmMean_Catego$df[2]`) =
+`r round(Report_Anxiety_Vocaliz_lmMean_Catego$coefficients[2,3], digits = 2)`, *p* `r pValue(Report_Anxiety_Vocaliz_lmMean_Catego$coefficients[2,4])`, η² = `r round(rsq(Anxiety_Vocaliz_lmMean_Catego), digit = 3)`).
+
+
+### Response Time
+
+#### Statistical Approach
+
+All data were analyzed using RStudio statistical software [@R-base]. 
+To analyze the effect of threat on involuntary attentional capture, we conducted mixed model analyses using the `lme4` [@R-lme4] and `lmerTest` [@R-lmerTest] packages. 
+To determine the most appropriate model for testing the effect of threat on response times, we used the `buildmer` package [@R-buildmer], which automates the model selection process. 
+However, in addition to automated model selection, a stepwise model selection process was performed. The final model used to predict response times in this task is as follows:
+
+```
+Response Time ~ Congruency * Validity * Condition + 
+     (Congruency * Validity + Condition || Participant)
+```
+
+Contrary to our pre-registration, we did not use contrast analyses to test the effect of the experimental condition on involuntary attentional capture. To simplify the analysis and interpretation of the results, we initially removed the *Vocalize* block as well as *Neutral* trials (i.e., trials without colored cues). 
+Exclusion criteria consistent with our pre-registration were applied in the analysis of reaction times^[The exclusion criteria applied in this analysis were as follows: removal of trials where participants made an error or did not respond within the correct time window (i.e., 1500 ms), removal of trials with response times more than 3 MAD above or below the median of the response times [@leysDetectingOutliersNot2013], removal of participants with error rates higher than 3 MAD from the sample median (*n* = `r (nlevels(factor(df_Catego$response_id)) - nlevels(factor(df_Catego_Prereg_Excl$response_id)))` participants removed due to an accuracy rate below `r round((median(df_Catego_NoNeut$Accuracy_Rate)-3*mad(df_Catego_NoNeut$Accuracy_Rate))*100, digit = 1)`%). Finally, we removed outliers characterized by high studentized residuals (i.e., greater than 3 or less than -3), large leverage values (i.e., greater than 0.35), or significant Cook's distances (i.e., greater than 0.32). The thresholds for Cook's distances and leverage values were determined based on a visual inspection of the data. The final dataset consists of *k* = `r nrow(df_Catego_NoNeut_Prereg_Excl_RT_Out)` trials]. 
+Similar exclusion criteria were systematically applied in all mixed model analyses of this study except that we did not remove error trials for accuracy analyses (clarifications of models are available in the Supplementary).
+
+
+#### General Model Parameters
+
+Overall, the Intraclass Correlation Coefficient (ICC) of this model indicates that a moderate portion of the total variance is explained solely by the random effects (ICC = `r round((perf_RT_ModFinal_02[1, "ICC"]*100), digits = 1)`%). 
+Since a large portion of the variance is explained by random individual differences, this suggests that using a mixed model analysis is crucial rather than relying on more traditional linear regression models. 
+Additionally, the conditional R² of this model suggests that `r round((perf_RT_ModFinal_02[1, "R2_conditional"]*100), digits = 1)`% of the total variance in the model is explained by both fixed and random effects together. 
+Thus, a much larger portion of the variance in response times is explained by random effects compared to the fixed effects. 
+In fact, the marginal R² of the model indicates that, in isolation, the fixed effects explain only `r round((perf_RT_ModFinal_02[1, "R2_marginal"]*100), digits = 1)`% of the variance in the data. 
+
+
+#### Contingent capture effect
+
+Analyses reveal a main effect of cueing validity (*b* = `r round(coefs_RT_ModFinal_02["Validity_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_ModFinal_02, type = "ml1")[["Validity_C"]], digit =0)`) =
+`r round(coefs_RT_ModFinal_02["Validity_C", "t.value"], digits = 2)`, *p* `r pValue(coefs_RT_ModFinal_02["Validity_C", "Pr...t.."])`). 
+In this way, participants are faster at categorizing the target when it appears in the same location as the distractor cue (*M* = `r round(Mean_RT_Validity["Valid", "mean"], digits = 0)` ms, *SD* = `r round(Mean_RT_Validity["Valid", "se"], digits = 2)`) rather than another location (*M* = `r round(Mean_RT_Validity["Invalid", "mean"], digits = 0)` ms, *SD* = `r round(Mean_RT_Validity["Invalid", "se"], digits = 2)`). 
+Moreover, our analysis also reveals a main effect of congruency (*b* = `r round(coefs_RT_ModFinal_02["Congruency_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_ModFinal_02, type = "ml1")[["Congruency_C"]], digit =0)`) =
+`r round(coefs_RT_ModFinal_02["Congruency_C", "t.value"], digits = 2)`, *p* `r pValue(coefs_RT_ModFinal_02["Congruency_C", "Pr...t.."])`). 
+This effect suggests that participants are slower at categorizing the target when its color is congruent with the color of the cue (*M* = `r round(Mean_RT_Congruency["Congruent", "mean"], digits = 0)` ms, *SE* = `r round(Mean_RT_Congruency["Congruent", "se"], digits = 2)`) compared with trials where the target and cue colors are incongruent (*M* = `r round(Mean_RT_Congruency["Incongruent", "mean"], digits = 0)` ms, *SE* = `r round(Mean_RT_Congruency["Incongruent", "se"], digits = 2)`)
+
+
+This effect of congruency is primarily the result of an interaction between congruency of the cue and its validity (*b* = `r round(coefs_RT_ModFinal_02["Congruency_C:Validity_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_ModFinal_02, type = "ml1")[["Congruency_C:Validity_C"]], digit =0)`) =
+`r round(coefs_RT_ModFinal_02["Congruency_C:Validity_C", "t.value"], digits = 2)`, *p* `r  pValue(coefs_RT_ModFinal_02["Congruency_C:Validity_C", "Pr...t.."])`). 
+This interaction reveals that the effect of validity is larger in congruent trials (*b* = `r round(coefs_RT_SimpEffect_Cong["Validity_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_SimpEffect_Cong, type = "ml1")[["Validity_C"]], digit =0)`) =
+`r round(coefs_RT_SimpEffect_Cong["Validity_C", "t.value"], digits = 2)`, *p* `r  pValue(coefs_RT_SimpEffect_Cong["Validity_C", "Pr...t.."])`) than in incongruent trials (*b* = `r round(coefs_RT_SimpEffect_Incong["Validity_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_SimpEffect_Incong, type = "ml1")[["Validity_C"]], digit =0)`) =
+`r round(coefs_RT_SimpEffect_Incong["Validity_C", "t.value"], digits = 2)`, *p* `r  pValue(coefs_RT_SimpEffect_Incong["Validity_C", "Pr...t.."])`). 
+This means that when there is no match between the color of the target and the color of the cue, the difference in response times between valid and invalid trials is very small compared to trials in which there is a match between the target and cue colors
+
+
+#### Effect of Threat
+
+Regarding the effect of threat on response times, our analysis shows no significant main effect of the experimental condition (*b* = `r round(coefs_RT_ModFinal_02["Condition_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_ModFinal_02, type = "ml1")[["Condition_C"]], digit =0)`) =
+`r round(coefs_RT_ModFinal_02["Condition_C", "t.value"], digits = 2)`, *p* `r  pValue(coefs_RT_ModFinal_02["Condition_C", "Pr...t.."])`) and no significant interaction effect with other variables in the model (for the interaction with validity: *b* = `r round(coefs_RT_ModFinal_02["Validity_C:Condition_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_ModFinal_02, type = "ml1")[["Validity_C:Condition_C"]], digit =0)`) =
+`r round(coefs_RT_ModFinal_02["Validity_C:Condition_C", "t.value"], digits = 2)`, *p* `r  pValue(coefs_RT_ModFinal_02["Validity_C:Condition_C", "Pr...t.."])`; for the interaction with congruency: *b* = `r round(coefs_RT_ModFinal_02["Congruency_C:Condition_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_ModFinal_02, type = "ml1")[["Congruency_C:Condition_C"]], digit =0)`) =
+`r round(coefs_RT_ModFinal_02["Congruency_C:Condition_C", "t.value"], digits = 2)`, *p* `r  pValue(coefs_RT_ModFinal_02["Congruency_C:Condition_C", "Pr...t.."])`; for the 3-way interaction: *b* = `r round(coefs_RT_ModFinal_02["Congruency_C:Validity_C:Condition_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_ModFinal_02, type = "ml1")[["Congruency_C:Validity_C:Condition_C"]], digit =0)`) =
+`r round(coefs_RT_ModFinal_02["Congruency_C:Validity_C:Condition_C", "t.value"], digits = 2)`, *p* `r  pValue(coefs_RT_ModFinal_02["Congruency_C:Validity_C:Condition_C", "Pr...t.."])`). 
+All of these results suggest that the random occurrence of distress screams during the block does not impact participants' response times. 
+Additionally, this manipulation does not cause participants to be faster or slower depending on the validity or congruency of the cue in each trial. 
+These results seem to contradict the hypothesis of a reinforcement of contingent attentional capture in a threatening context, at least in terms of response times. 
+However, it is impossible to conclude a total absence of effect since an equivalence analysis using a non-standardized SESOI of 9.76 ms (i.e., a standardized effect size *d* = `r rounding2(d_SESOI_Fixef_Posteriori)`) failed to conclude on the equivalence of the 3-way interaction (*SESOI* = 9.76 ms, *t*(`r rounding2(lower_RT_Catego$df)`) = `r rounding2(lower_RT_Catego$'t value') `, *p* `r pValue(lower_RT_Catego$'Pr(>|t|)'/2)`)^[In our pre-registration, we originally intended to use a SESOI of *d* = 0.23. However, we did not have the statistical power required to detect such a small effect since such a Cohen's *d* corresponds to a non-standardized effect size of `r rounding2(SESOI_Fixef_Prereg)` ms. Therefore, we later modified the threshold used for our equivalence tests. The final SESOI used corresponds to twice the non-standardized effect size on which we based our power analysis, i.e., -4.88 x 2 = -9.76 ms.]
+
+
+
+### Accuracy
+
+#### Statistical Approach
+
+In the analysis of response accuracy, the same exclusion criteria applied in the response time analysis were used. The final model used to predict accuracy in this task is as follows:
+
+```
+Accuracy ~ Congruency * Validity * Condition + 
+      (Congruency * Validity + Congruency * Condition || Participant) +
+      (Congruency || Target-Type)
+```
+
+#### Contingent capture effect
+
+As with the response times, our analyses reveal a main effect of the validity of the cue (*b* = `r round(coefs_Accuracy_ModFinal["Validity_C", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Accuracy_ModFinal, type = "ml1")[["Validity_C"]], digit =0)`) =
+`r round(coefs_Accuracy_ModFinal["Validity_C", "z.value"], digits = 2)`, *p* `r  pValue(coefs_Accuracy_ModFinal["Validity_C", "Pr...z.."])`) and a main effect of the congruency of the cue (*b* = `r round(coefs_Accuracy_ModFinal["Congruency_C", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Accuracy_ModFinal, type = "ml1")[["Congruency_C"]], digit =0)`) =
+`r round(coefs_Accuracy_ModFinal["Congruency_C", "z.value"], digits = 2)`, *p* `r  pValue(coefs_Accuracy_ModFinal["Congruency_C", "Pr...z.."])`). 
+This means that participants are more accurate in their responses during valid trials compared to invalid trials (respectively `r round((Mean_Accuracy_Validity["Valid", "Accuracy"])*100, digits = 1)`% and `r round((Mean_Accuracy_Validity["Invalid", "Accuracy"])*100, digits = 1)`% accuracy, *OR* = `r round(OR_Accuracy_ModFinal["Validity_C", "estimate"], digits = 2)`, IC à 95% [`r round(OR_Accuracy_ModFinal["Validity_C", "conf.low"], digits = 2)`, `r round(OR_Accuracy_ModFinal["Validity_C", "conf.high"], digits = 2)`]). 
+Additionally, participants are less accurate when there is a match between the cue and target colors than when there is a mismatch (`r round((Mean_Accuracy_Congruency["Congruent", "Accuracy"])*100, digits = 1)`% et `r round((Mean_Accuracy_Congruency["Incongruent", "Accuracy"])*100, digits = 1)`% accuracy respectively for congruent and incongruent trials, *OR* = `r round(OR_Accuracy_ModFinal["Congruency_C", "estimate"], digits = 2)`, 95% CI [`r round(OR_Accuracy_ModFinal["Congruency_C", "conf.low"], digits = 2)`, `r round(OR_Accuracy_ModFinal["Congruency_C", "conf.high"], digits = 2)`]). 
+
+The results also show a significant interaction between *Validity* and *Congruency* (*b* = `r round(coefs_Accuracy_ModFinal["Congruency_C:Validity_C", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Accuracy_ModFinal, type = "ml1")[["Congruency_C:Validity_C"]], digit =0)`) =
+`r round(coefs_Accuracy_ModFinal["Congruency_C:Validity_C", "z.value"], digits = 2)`, *p* `r  pValue(coefs_Accuracy_ModFinal["Congruency_C:Validity_C", "Pr...z.."])`). This interaction shows that the effect of validity on response accuracy is stronger in congruent trials (*b* = `r round(coefs_Accuracy_SimpEffect_Cong["Validity_C", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Accuracy_SimpEffect_Cong, type = "ml1")[["Validity_C"]], digit =0)`) =
+`r round(coefs_Accuracy_SimpEffect_Cong["Validity_C", "z.value"], digits = 2)`, *p* `r  pValue(coefs_Accuracy_SimpEffect_Cong["Validity_C", "Pr...z.."])`) than in incongruent trials (*b* = `r round(coefs_Accuracy_SimpEffect_Incong["Validity_C", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Accuracy_SimpEffect_Incong, type = "ml1")[["Validity_C"]], digit =0)`) =
+`r round(coefs_Accuracy_SimpEffect_Incong["Validity_C", "z.value"], digits = 2)`, *p* `r  pValue(coefs_Accuracy_SimpEffect_Incong["Validity_C", "Pr...z.."])`). 
+This means that when there is no match between the color of the distractor cue and the target color, there is no significant difference in accuracy between valid and invalid cue locations. In contrast, the validity of the cue has a significant effect on response accuracy in congruent trials. These results align with the contingent capture hypothesis [@folkInvoluntaryCovertOrienting1992; @folkSelectivityDistractionIrrelevant1998].
+
+
+#### Effect of Threat
+
+Concerning the effect of threat on response accuracy, our analyses did not reveal a significant main effect of threat (*b* = `r round(coefs_Accuracy_ModFinal["Condition_C", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Accuracy_ModFinal, type = "ml1")[["Condition_C"]], digit =0)`) =
+`r round(coefs_Accuracy_ModFinal["Condition_C", "z.value"], digits = 2)`, *p* `r  pValue(coefs_Accuracy_ModFinal["Condition_C", "Pr...z.."])`). 
+This analysis also did not reveal a significant interaction effect with cue validity (*b* = `r round(coefs_Accuracy_ModFinal["Validity_C:Condition_C", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Accuracy_ModFinal, type = "ml1")[["Validity_C:Condition_C"]], digit =0)`) =
+`r round(coefs_Accuracy_ModFinal["Validity_C:Condition_C", "z.value"], digits = 2)`, *p* `r  pValue(coefs_Accuracy_ModFinal["Validity_C:Condition_C", "Pr...z.."])`), nor a 3-way interaction as predicted by our hypotheses (*b* = `r round(coefs_Accuracy_ModFinal["Congruency_C:Validity_C:Condition_C", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Accuracy_ModFinal, type = "ml1")[["Congruency_C:Validity_C:Condition_C"]], digit =0)`) =
+`r round(coefs_Accuracy_ModFinal["Congruency_C:Validity_C:Condition_C", "z.value"], digits = 2)`, *p* `r  pValue(coefs_Accuracy_ModFinal["Congruency_C:Validity_C:Condition_C", "Pr...z.."])`). 
+However, this analysis revealed a marginal interaction between *Congruency* and *Condition* (*b* = `r round(coefs_Accuracy_ModFinal["Congruency_C:Condition_C", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Accuracy_ModFinal, type = "ml1")[["Congruency_C:Condition_C"]], digit =0)`) =
+`r round(coefs_Accuracy_ModFinal["Congruency_C:Condition_C", "z.value"], digits = 2)`, *p* `r  pValue(coefs_Accuracy_ModFinal["Congruency_C:Condition_C", "Pr...z.."])`). 
+
+According to this result, the threatening condition is associated with a decrease in the congruency effect. Thus, the difference in accuracy between congruent and incongruent trials tends to be reduced in the *Threat* block (*b* =
+`r round(coefs_Accuracy_SimpEffect_Threat["Congruency_C", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Accuracy_SimpEffect_Threat, type = "ml1")[["Congruency_C"]], digit =0)`)
+=
+`r round(coefs_Accuracy_SimpEffect_Threat["Congruency_C", "z.value"], digits = 2)`,
+*p* `r  pValue(coefs_Accuracy_SimpEffect_Threat["Congruency_C", "Pr...z.."])`) compared to the *Control* one (*b* =
+`r round(coefs_Accuracy_SimpEffect_Ctrl["Congruency_C", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Accuracy_SimpEffect_Ctrl, type = "ml1")[["Congruency_C"]], digit =0)`)
+=
+`r round(coefs_Accuracy_SimpEffect_Ctrl["Congruency_C", "z.value"], digits = 2)`,
+*p* `r  pValue(coefs_Accuracy_SimpEffect_Ctrl["Congruency_C", "Pr...z.."])`). 
+In threatening contexts, participants tend to rely less on cue congruency compared to non-threatening situations. 
+This result contrasts with the hypothesis of enhanced goal-driven attentional priorities, which would suggest that threat amplifies the reliance on congruent cues while reducing the reliance on incongruent ones.
+
+
+
+### Exploratory analyses
+
+Our main analyses focused on comparing the *Threat* and *Control* experimental conditions. 
+However, additional post hoc analyses were specifically conducted comparing the *Threat* and *Vocalization* blocks.
+Contrary to our hypotheses, these analyses did not reveal the expected 3-way interaction `(Condition X Validité X Congruency)` for either response times (*b* = `r round(coefs_RT_ModFinal_SoundComp_02["Congruency_C:Validity_C:Sound_Type", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_ModFinal_SoundComp_02, type = "ml1")[["Congruency_C:Validity_C:Sound_Type"]], digit =0)`) =
+`r round(coefs_RT_ModFinal_SoundComp_02["Congruency_C:Validity_C:Sound_Type", "t.value"], digits = 2)`, *p* `r  pValue(coefs_RT_ModFinal_SoundComp_02["Congruency_C:Validity_C:Sound_Type", "Pr...t.."])`) or response accuracy (*b* = `r round(coefs_Accuracy_ModFinal_SoundComp["Congruency_C:Validity_C:Sound_Type", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Accuracy_ModFinal_SoundComp, type = "ml1")[["Congruency_C:Validity_C:Sound_Type"]], digit =0)`) =
+`r round(coefs_Accuracy_ModFinal_SoundComp["Congruency_C:Validity_C:Sound_Type", "z.value"], digits = 2)`, *p* `r  pValue(coefs_Accuracy_ModFinal_SoundComp["Congruency_C:Validity_C:Sound_Type", "Pr...z.."])`). 
+Moreover, an equivalence analysis on response times indicated that the impact of sound type (i.e., distress screams vs. vocalizations) on contingent capture was marginally smaller than a raw effect size of 9.76 ms (*t*(`r rounding2(upper_SoundComp$df)`) = `r rounding2(upper_SoundComp$'t value') `, *p* `r pValue(upper_SoundComp$'Pr(>|t|)'/2)`). 
+Given that the *Threat* and *Vocalization* conditions were marginally equivalent regarding the 3-way interaction, we conducted exploratory analyses aggregating the data from the *Threat* and *Vocalization* blocks to compare them against the data from the *Control* block. Mixed models identical to those used in the analyses excluding the *Vocalization* block were then applied.
+
+
+
+#### Effect of Unpredictable Sounds on Response Times
+
+For response times, our exploratory analysis revealed fixed effects identical to those reported without accounting for the *Vocalize* block. 
+Furthermore, this analysis indicated a marginal 3-way interaction effect (*b* = `r round(coefs_RT_ModFinal_ThTo_02["Congruency_C:Validity_C:Sounds_Presence_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_ModFinal_ThTo_02, type = "ml1")[["Congruency_C:Validity_C:Sounds_Presence_C"]], digit =0)`) =
+`r round(coefs_RT_ModFinal_ThTo_02["Congruency_C:Validity_C:Sounds_Presence_C", "t.value"], digits = 2)`, *p* `r  pValue(coefs_RT_ModFinal_ThTo_02["Congruency_C:Validity_C:Sounds_Presence_C", "Pr...t.."])`). 
+As hypothesized, the decomposition of simple effects suggests that the effect of contingent capture appeared amplified when sounds (i.e., distress screams or human vocalizations) could be heard unpredictably during the block (*b* = `r round(coefs_RT_ModFinal_ThTo_SimpEffect_Sound["Congruency_C:Validity_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_ModFinal_ThTo_SimpEffect_Sound, type = "ml1")[["Congruency_C:Validity_C"]], digit =0)`) =
+`r round(coefs_RT_ModFinal_ThTo_SimpEffect_Sound["Congruency_C:Validity_C", "t.value"], digits = 2)`, *p* `r  pValue(coefs_RT_ModFinal_ThTo_SimpEffect_Sound["Congruency_C:Validity_C", "Pr...t.."])`) compared to a block without any sounds (*b* = `r round(coefs_RT_ModFinal_ThTo_SimpEffect_NoSound["Congruency_C:Validity_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_ModFinal_ThTo_SimpEffect_NoSound, type = "ml1")[["Congruency_C:Validity_C"]], digit =0)`) =
+`r round(coefs_RT_ModFinal_ThTo_SimpEffect_NoSound["Congruency_C:Validity_C", "t.value"], digits = 2)`, *p* `r  pValue(coefs_RT_ModFinal_ThTo_SimpEffect_NoSound["Congruency_C:Validity_C", "Pr...t.."])`). 
+Compared to the *Control* block, the presence of sounds increased the validity effect by `r rounding2(abs(coefs_RT_ModFinal_ThTo_02["Congruency_C:Validity_C:Sounds_Presence_C", "Estimate"]))` ms in congruent relative incongruent trials.
+
+More precisely, in the *Control* condition, when the target and cue were congruent, the response time difference between valid and invalid trials was `r rounding2(abs(coefs_RT_ModFinal_ThTo_SimpEffect_Cong_NoSound["Validity_C", "Estimate"]))` ms (*b* = `r round(coefs_RT_ModFinal_ThTo_SimpEffect_Cong_NoSound["Validity_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_ModFinal_ThTo_SimpEffect_Cong_NoSound, type = "ml1")[["Validity_C"]], digit =0)`) =
+`r round(coefs_RT_ModFinal_ThTo_SimpEffect_Cong_NoSound["Validity_C", "t.value"], digits = 2)`, *p* `r pValue(coefs_RT_ModFinal_ThTo_SimpEffect_Cong_NoSound["Validity_C", "Pr...t.."])`), whereas this effect was larger (i.e., `r rounding2(abs(coefs_RT_ModFinal_ThTo_SimpEffect_Cong_Sound["Validity_C", "Estimate"]))` ms) when unpredictable screams were heard (*b* = `r round(coefs_RT_ModFinal_ThTo_SimpEffect_Cong_Sound["Validity_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_ModFinal_ThTo_SimpEffect_Cong_Sound, type = "ml1")[["Validity_C"]], digit =0)`) =
+`r round(coefs_RT_ModFinal_ThTo_SimpEffect_Cong_Sound["Validity_C", "t.value"], digits = 2)`, *p* `r pValue(coefs_RT_ModFinal_ThTo_SimpEffect_Cong_Sound["Validity_C", "Pr...t.."])`). 
+When the target and cue were incongruent, a marginal validity effect was observed in the *Control* condition (*b* = `r round(coefs_RT_ModFinal_ThTo_SimpEffect_Incong_NoSound["Validity_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_ModFinal_ThTo_SimpEffect_Incong_NoSound, type = "ml1")[["Validity_C"]], digit =0)`) =
+`r round(coefs_RT_ModFinal_ThTo_SimpEffect_Incong_NoSound["Validity_C", "t.value"], digits = 2)`, *p* `r pValue(coefs_RT_ModFinal_ThTo_SimpEffect_Incong_NoSound["Validity_C", "Pr...t.."])`), but this was no longer significant in blocks where sounds were heard (*b* = `r round(coefs_RT_ModFinal_ThTo_SimpEffect_Incong_Sound["Validity_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_ModFinal_ThTo_SimpEffect_Incong_Sound, type = "ml1")[["Validity_C"]], digit =0)`) =
+`r round(coefs_RT_ModFinal_ThTo_SimpEffect_Incong_Sound["Validity_C", "t.value"], digits = 2)`, *p* `r pValue(coefs_RT_ModFinal_ThTo_SimpEffect_Incong_Sound["Validity_C", "Pr...t.."])`). 
+Figure \@ref(fig:Figure-3WayInteract-RT-Catego) illustrates the interaction pattern observed in this exploratory analysis.
+
+
+```{r Figure-3WayInteract-RT-Catego, fig.cap = "(ref:Title-Figure-3WayInteract-RT-Catego)", fig.align = 'center', echo=FALSE, warning=FALSE, message=FALSE}
+# Generate the plot from plot_model (assuming it's the 4th graph in the interaction terms)
+Graph_3wayInteract_RT <- plot_model(RT_ModFinal_ThTo_str, type = "int", terms = c("Sounds_Presence_str", "Cueing_Validity", "Congruency"))[[4]]
+
+# Customize the plot to fit APA guidelines
+Graph_3wayInteract_RT + 
+  # Modify the legend titles and axis labels
+  labs(color = "Cue validity", 
+       fill = "Cue congruency", 
+       linetype = "Cue validity",  # Assuming linetype also represents Validity
+       y = "Response Time", 
+       x = "Cue Congruency") +  # Modify the x-axis label based on the variable
+  
+  # Modify the labels of each variable modality
+  scale_color_manual(
+    values = c("green4", "red"),  # Custom colors for Validity (adjust as needed)
+    labels = c("Valid", "Invalid")  # Custom labels for Validity
+  ) +
+
+  scale_linetype_manual(
+    values = c("solid", "dashed"),  # Linetypes (solid and dashed)
+    labels = c("Congruent", "Incongruent")  # Custom labels for Congruency
+  ) +
+
+  # Facet the plot by Sounds_Presence_str and customize facet labels
+  facet_wrap(~ c("With_Sound", "Without_Sound"), labeller = as_labeller(
+    c("With_Sound" = "Threat + Vocalize blocks", "Without_Sound" = "Control block")  # Map the values of Sounds_Presence_str to custom labels
+  )) +
+  
+ # Remove the main title and apply APA styling
+  theme(
+    plot.title = element_blank(),  # Remove the main title
+    legend.position = "top",       # Move legend to the top for APA style
+    axis.title.x = element_text(size = 12),  # Adjust x-axis label size
+    axis.title.y = element_text(size = 12),  # Adjust y-axis label size
+    axis.text = element_text(size = 10),     # Adjust axis text size
+    legend.text = element_text(size = 10),   # Adjust legend text size
+    legend.title = element_text(size = 12),  # Adjust legend title size
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)  # Rotate x-axis labels to avoid overlap
+  ) +
+
+# Adding lines between valid values and between invalid values for each graph
+  geom_line(aes(), 
+            position = position_dodge(width = 0.1), size = 0.5)  # Add lines with grouping by all 3 variables
+
+```
+
+(ref:Title-Figure-3WayInteract-RT-Catego) **Reinforcement of Attentional Contingent Capture on Response Times**. In this figure, the graph on the left corresponds to the combined data from the *Threat* and *Vocalization* blocks, where participants randomly hear distress screams and human vocalizations. The graph on the right corresponds to the data from the *Control* block, in which no sounds occur during the spatial cueing task.
+
+
+
+#### Effect of Unpredictable Sounds on Accuracy
+
+
+For response accuracy, the analysis shows significant main effects and interactions identical to those found in the non-exploratory analyses.
+Additionally, it reveals a marginal 3-way interaction effect consistent with our hypotheses  (*b* = `r round(coefs_Accuracy_ModFinal_ThTo["Congruency_C:Validity_C:Sounds_Presence_C", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Accuracy_ModFinal_ThTo, type = "ml1")[["Congruency_C:Validity_C:Sounds_Presence_C"]], digit =0)`) =
+`r round(coefs_Accuracy_ModFinal_ThTo["Congruency_C:Validity_C:Sounds_Presence_C", "z.value"], digits = 2)`, *OR* = `r round(OR_Accuracy_ModFinal_ThTo["Congruency_C:Validity_C:Sounds_Presence_C", "estimate"], digits = 2)`, IC à 95% [`r round(OR_Accuracy_ModFinal_ThTo["Congruency_C:Validity_C:Sounds_Presence_C", "conf.low"], digits = 2)`, `r round(OR_Accuracy_ModFinal_ThTo["Congruency_C:Validity_C:Sounds_Presence_C", "conf.high"], digits = 2)`], *p* `r  pValue(coefs_Accuracy_ModFinal_ThTo["Congruency_C:Validity_C:Sounds_Presence_C", "Pr...z.."])`). 
+This indicates that contingent capture is strengthened when unpredictable screams are heard during the trial block compared to when no sounds are heard (see Figure \@ref(fig:Figure-3WayInteract-Acc-Catego)). 
+The analysis of simple effects reveals that contingent capture is observed when sounds are present (*b* = `r round(coefs_Acc_ModFinal_ThTo_SimpEffect_Sound["Congruency_C:Validity_C", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Acc_ModFinal_ThTo_SimpEffect_Sound, type = "ml1")[["Congruency_C:Validity_C"]], digit =0)`) =
+`r round(coefs_Acc_ModFinal_ThTo_SimpEffect_Sound["Congruency_C:Validity_C", "z.value"], digits = 2)`, *p* `r  pValue(coefs_Acc_ModFinal_ThTo_SimpEffect_Sound["Congruency_C:Validity_C", "Pr...z.."])`), whereas this effect is not significant when no sounds are heard (*b* = `r round(coefs_Acc_ModFinal_ThTo_SimpEffect_NoSound["Congruency_C:Validity_C", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Acc_ModFinal_ThTo_SimpEffect_NoSound, type = "ml1")[["Congruency_C:Validity_C"]], digit =0)`) =
+`r round(coefs_Acc_ModFinal_ThTo_SimpEffect_NoSound["Congruency_C:Validity_C", "z.value"], digits = 2)`, *p* `r  pValue(coefs_Acc_ModFinal_ThTo_SimpEffect_NoSound["Congruency_C:Validity_C", "Pr...z.."])`).
+
+
+```{r Figure-3WayInteract-Acc-Catego, fig.cap = "(ref:Title-Figure-3WayInteract-Acc-Catego)", fig.align = 'center', echo=FALSE, warning=FALSE, message=FALSE}
+# Generate the plot from plot_model (assuming it's the 4th graph in the interaction terms)
+Graph_3wayInteract_Acc <- plot_model(Accuracy_ModFinal_ThTo_str, type = "int", terms = c("Sounds_Presence_str", "Cueing_Validity", "Congruency"))[[4]]
+
+# Customize the plot to fit APA guidelines
+Graph_3wayInteract_Acc + 
+  # Modify the legend titles and axis labels
+  labs(color = "Cue validity", 
+       fill = "Cue congruency", 
+       linetype = "Cue validity",  # Assuming linetype also represents Validity
+       y = "Response Accuracy", 
+       x = "Cue congruency") +  # Modify the x-axis label based on the variable
+  
+  # Modify the labels of each variable modality
+  scale_color_manual(
+    values = c("green4", "red"),  # Custom colors for Validity (adjust as needed)
+    labels = c("Valid", "Invalid")  # Custom labels for Validity
+  ) +
+
+  scale_linetype_manual(
+    values = c("solid", "dashed"),  # Linetypes (solid and dashed)
+    labels = c("Congruent", "Incongruent")  # Custom labels for Congruency
+  ) +
+
+  # Facet the plot by Sounds_Presence_str and customize facet labels
+  facet_wrap(~ c("With_Sound", "Without_Sound"), labeller = as_labeller(
+    c("With_Sound" = "Threat + Vocalize blocks", "Without_Sound" = "Control block")  # Map the values of Sounds_Presence_str to custom labels
+  )) +
+  
+ # Remove the main title and apply APA styling
+  theme(
+    plot.title = element_blank(),  # Remove the main title
+    legend.position = "top",       # Move legend to the top for APA style
+    axis.title.x = element_text(size = 12),  # Adjust x-axis label size
+    axis.title.y = element_text(size = 12),  # Adjust y-axis label size
+    axis.text = element_text(size = 10),     # Adjust axis text size
+    legend.text = element_text(size = 10),   # Adjust legend text size
+    legend.title = element_text(size = 12),  # Adjust legend title size
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)  # Rotate x-axis labels to avoid overlap
+  ) +
+
+# Adding lines between valid values and between invalid values for each graph
+  geom_line(aes(), 
+            position = position_dodge(width = 0.1), size = 0.5)  # Add lines with grouping by all 3 variables
+
+```
+
+(ref:Title-Figure-3WayInteract-Acc-Catego) **Reinforcement of Attentional Contingent Capture on Response Times**. In this figure, the graph on the left corresponds to the combined data from the *Threat* and *Vocalization* blocks, where participants randomly hear distress screams and human vocalizations. The graph on the right corresponds to the data from the *Control* block, in which no sounds occur during the spatial cueing task.
+
+
+
+## Discussion
+
+In this study, the hypothesis was that threat — induced by the unpredictable occurrence of distress screams — strengthens goal-driven attentional priorities.
+Indeed, the anxious arousal triggered by a state of threat is expected to alter the attentional weights assigned to visual stimuli, depending on whether they share common attributes with the current attentional settings.
+In a spatial cueing task, this should manifest as an increase in interference effects for cues congruent with task goals and a reduction in interference effects for cues incongruent with task goals.
+Contrary to our predictions, our study did not show the expected effect. 
+Specifically, our main analyses did not reveal a significant modification of contingent capture effects in threatening situations in comparison to more neutral ones.
+Equivalence tests, however, did not allow us to conclude that the observed effect was significantly smaller than a moderate effect size (i.e., *d* = `r rounding2(d_SESOI_Fixef_Posteriori)`).
+
+
+Nonetheless, the original study conducted by Normand et al. [@normandDoesEvaluativePressure2014] also did not show a significant effect of self-evaluative threat in a categorization task.
+Thus, it is possible that the lack of results in our experiment stems from the use of a compound search instruction (i.e., locating and categorizing the colored target), as the original study highlighted a threat effect only in a simple search task (i.e., locating the colored target).
+To test the effect of Threat of Screams on the reinforcement of attentional selectivity, we conducted a second spatial cueing study in which participants were instructed solely to locate the colored target, without categorizing it.
+
+
+# Supplementary
+
+## Supplementary : Study 1 {#Supplementary-Study-1}
+
+### Sample size a priori {#Supplementary-Study-1-Sample}
+
+::: {#Sample-Study1 .message}
+> **Study 1: Overview of the a priori sample size calculation**
+>
+>To calculate the sample size, we used the means and standard deviations from an unpublished study by Normand et al. [@normandDoesEvaluativePressure2014] to simulate data using the `simr` package [@R-simr]. This study was favored over those reported in the article because it specifically used the spatial cuing task of Folk and Remington [@folkSelectivityDistractionIrrelevant1998]. For this calculation, we employed a model comparison approach to detect a 3-way interaction effect `(Condition X Validity X Congruency)` with an unstandardized effect size of -4.88 ms. This power calculation set the statistical power at 95% and used a significance threshold of α = 0.05. Thus, if a 3-way interaction effect truly existed, we had a 95% chance of detecting an effect equal to or greater than 5 ms.
+>
+> The detailed steps for conducting this power analysis are described below:
+>
+> 1)  Use the response time means and standard deviations from the study by Normand et al. (2014) to define the distribution of the simulated sample.
+>
+> 2)  Simulate the data of 35 participants. For each participant, the data contain the following variables of interest:
+>
+> -   Cueing Validity (Valid VS Invalid),
+> -   Cueing Congruency (Congruent VS Incongruent),
+> -   Experimental condition (Threat VS Control).
+>
+> (In this simulation, we do not use the *Vocalize* condition for the power analysis.)
+>
+> 3)  Extend the number of trials to *k* = 192 trials per participant (i.e., *k* = 48 congruent trials and *k* = 48 incongruent trials for the *Threat* condition, as well as *k* = 48 congruent trials and *k* = 48 incongruent trials for the *Control* condition), while respecting the response time distribution defined in step 1.
+>
+> 4)  Extend the number of participants (e.g., 400 participants).
+>
+> 5)  Calculate the statistical power required to detect a 3-way interaction effect by comparing it to a constrained model that does not account for this interaction.\
+
+:::
+
+### Compound VS Simple search instructions {#Compound-Instructions}
+
+In study 1, the instruction given to participants for performing the spatial cueing task corresponds to a compound search task instruction [@duncanVisualSearchVisual1985]. The task for participants is not only to identify the location of the colored target but also to categorize this target as either an *X* or an *=*. In contrast, in a simple search instruction, participants are only instructed to locate the appearance of the target. In such an instruction, response times are influenced by the correspondence between the lateralization of the stimuli and the lateralization of the response: individuals are faster to respond if the location of the response key matches the visual location of the stimuli on the screen. With such an instruction, the difference in response time between valid and invalid trials arises not only from a change in the spatial orientation of attention (e.g., orienting attention to a distractor cue presented on the left of the screen) but also from a pre-activation of the behavioral response (e.g., the motor response associated with the left middle finger). The interference effect observed (i.e., the difference in response time based on cue validity) can thus reflect both attention selection processes and behavioral response selection processes. A compound search task, on the other hand, allows a more specific study of attention selection processes by separating them from behavioral response selection processes [@theeuwesTopBottomControl2010]. Thus, even though participants must locate the target, their response choice is not influenced by the presence of the cue. The interference effect can then be interpreted as resulting solely from attention selection processes.
+The main differences between these two types of tasks are described in Figure \@ref(fig:ResponseDisplay).
+
+
+```{r ResponseDisplay, out.width = c('43.5%','40%'), fig.cap = "(ref:Title-ResponseDisplay)", fig.align = 'center', fig.show = 'hold', echo=FALSE}
+knitr::include_graphics(c("Images/Calibration_Menace/Display_Localization_Task.png", "Images/Calibration_Menace/Display_Categorization_Task.png"))
+```
+
+(ref:Title-ResponseDisplay) The diagram on the left corresponds to a simple search task in which participants must locate the position where the target appears. In the represented trial, participants must press the *Y* response key since the target appears at the top left of the screen. In such an instruction, the position of the responses directly corresponds to the location of the target on the screen. Thus, the response times to the task reflect both attention selection durations (i.e., orienting attention toward the target, which appears at the top of the screen) and response selection (i.e., the motor response required to indicate that the target appeared at the top of the screen). The diagram on the right corresponds to a compound search task in which participants must categorize the target (i.e., say whether it is an *X* or an *=*). In the represented trial, participants must press the *B* response key since the target corresponds to the letter *X*. In such an instruction, there is no spatial correspondence between the target's location and the response key. Thus, the response times to the task reflect the duration of attention selection (i.e., the spatial orientation of attention toward the target appearing at the top of the screen) while controlling for response selection (i.e., the motor response required to indicate that the target is an *X*). Unlike a simple search task, a compound search instruction helps limit the influence of automatic motor activation related to the lateralization of the target.
+
+
+### Results 
+
+#### Manipulation check : PTSD
+
+Analyses revealed that individuals with high PTSD scores react differently to anxiety manipulations. A mixed-effects analysis was used to examine the effect of PTSD on the evolution of anxiety between pre- and post-manipulation measures. Contrary to the prediction of a stronger reaction in individuals with high PTSD scores, the results show that the increase in anxiety in the *Threat* condition is more pronounced in participants with low PTSD scores compared to those with high scores (*b* = `r round(Report_Anxiety_PTSD_Threat_lm01_Catego$coefficients[2,1], digits = 2)`,
+*F*(`r Report_Anxiety_PTSD_Threat_lm01_Catego$df[1]-Report_Anxiety_PTSD_Threat_lm01_Catego[["fstatistic"]][["numdf"]]`, `r Report_Anxiety_PTSD_Threat_lm01_Catego$df[2]`) =
+`r round(Report_Anxiety_PTSD_Threat_lm01_Catego$coefficients[2,3], digits = 2)`, *p*
+`r ifelse((Report_Anxiety_PTSD_Threat_lm01_Catego$coefficients[2,4])<= 0.001 ,"< 0.001", ifelse((Report_Anxiety_PTSD_Threat_lm01_Catego$coefficients[2,4])<= 0.01 ,"< 0.01", paste0("= ", round((Report_Anxiety_PTSD_Threat_lm01_Catego$coefficients[2,4]), digit = 2))))`, η² = `r round(rsq(Anxiety_PTSD_Threat_lm01_Catego)[[1]], digit = 3)`). The results are similar when examining the effect of PTSD scores on the increase in self-reported anxiety in the *Control* block (*b* = `r round(Report_Anxiety_PTSD_Ctrl_lm01_Catego$coefficients[2,1], digits = 3)`,
+*F*(`r Report_Anxiety_PTSD_Ctrl_lm01_Catego$df[1]-Report_Anxiety_PTSD_Ctrl_lm01_Catego[["fstatistic"]][["numdf"]]`, `r Report_Anxiety_PTSD_Ctrl_lm01_Catego$df[2]`) =
+`r round(Report_Anxiety_PTSD_Ctrl_lm01_Catego$coefficients[2,3], digits = 2)`, *p*
+`r ifelse((Report_Anxiety_PTSD_Ctrl_lm01_Catego$coefficients[2,4])<= 0.001 ,"< 0.001", ifelse((Report_Anxiety_PTSD_Ctrl_lm01_Catego$coefficients[2,4])<= 0.01 ,"< 0.01", paste0("= ", round((Report_Anxiety_PTSD_Ctrl_lm01_Catego$coefficients[2,4]), digit = 2))))`, η² = `r round(rsq(Anxiety_PTSD_Ctrl_lm01_Catego)[[1]], digit = 3)`), or the *Vocalize* bloc (*b* = `r round(Report_Anxiety_PTSD_Toon_lm01_Catego$coefficients[2,1], digits = 3)`,
+*F*(`r Report_Anxiety_PTSD_Toon_lm01_Catego$df[1]-Report_Anxiety_PTSD_Toon_lm01_Catego[["fstatistic"]][["numdf"]]`, `r Report_Anxiety_PTSD_Toon_lm01_Catego$df[2]`) =
+`r round(Report_Anxiety_PTSD_Toon_lm01_Catego$coefficients[2,3], digits = 2)`, *p*
+`r ifelse((Report_Anxiety_PTSD_Toon_lm01_Catego$coefficients[2,4])<= 0.001 ,"< 0.001", ifelse((Report_Anxiety_PTSD_Toon_lm01_Catego$coefficients[2,4])<= 0.01 ,"< 0.01", paste0("= ", round((Report_Anxiety_PTSD_Toon_lm01_Catego$coefficients[2,4]), digit = 2))))`, η² = `r round(rsq(Anxiety_PTSD_Toon_lm01_Catego)[[1]], digit = 3)`). These results suggest that participants with higher PTSD scores are less sensitive to anxiety manipulations. In fact, the higher the PTSD score reported by participants, the less they report a significant increase in anxiety levels between pre- and post-manipulation measures in each block of trials. This means that not all participants respond in the same way to the threat induction, and participants with high PTSD symptoms tend to react less than others.
+
+This effect could be explained by an already high level of self-reported anxiety in these participants before any experimental manipulation. According to Wilder's law of initial values, "*there is a negative correlation between the initial value of a psychological variable and the magnitude of increase that can be produced by other manipulations*" [p. 408, @patersonClearDangerSituational1987]. Thus, since PTSD level is significantly linked to initial anxiety (*b* =
+`r round(Report_PTSD_Pretest_lm01_Catego$coefficients[2,1], digits = 2)`,
+*F*(`r Report_PTSD_Pretest_lm01_Catego$df[1]-Report_PTSD_Pretest_lm01_Catego[["fstatistic"]][["numdf"]]`, `r Report_PTSD_Pretest_lm01_Catego$df[2]`) =
+`r round(Report_PTSD_Pretest_lm01_Catego$coefficients[2,3], digits = 2)`, *p*
+`r ifelse((Report_PTSD_Pretest_lm01_Catego$coefficients[2,4])<= 0.001 ,"< 0.001", ifelse((Report_PTSD_Pretest_lm01_Catego$coefficients[2,4])<= 0.01 ,"< 0.01", paste0("= ", round((Report_PTSD_Pretest_lm01_Catego$coefficients[2,4]), digit = 2))))`, η² = `r round(rsq(PTSD_Pretest_lm01_Catego)[[1]], digit = 3)`), these participants are less likely to experience a significant increase in anxiety after any experimental manipulation
+
+
+#### Contingent capture effect on Response Time
+
+```{r FigureContingentCapture-Catego, fig.cap = "(ref:Title-FigureContingentCapture-Catego)", fig.align = 'center', echo=FALSE, warning=FALSE}
+
+# APA Style Line Graph with a Single Legend for Congruency
+ggplot(Mean_RT_Contingent_Capture, aes(x = Cueing_Validity, y = mean, color = Congruency, linetype = Congruency, group = Congruency)) +
+  
+  # Points and Error Bars
+  geom_point(position = position_dodge(width = 0.2), size = 2) +  # Larger point size for clarity
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se), width = 0.1, position = position_dodge(width = 0.2), size = 0.8) +  # Error bars with proper width
+  
+  # Line
+  geom_line(position = position_dodge(width = 0.2), size = 1) +  # Slightly thicker lines for APA clarity
+  
+  # Labels for X and Y axis
+  xlab("Cue Validity") +
+  ylab("Response Time (in milliseconds)") +
+  
+  # Custom X-axis labels
+  scale_x_discrete(limits = c("Valid", "Invalid"), 
+                   labels = c("Valid", "Invalid")) +
+  
+  # Custom color and linetype scale, with combined legend
+  scale_color_manual(
+    values = c("green4", "red", "black"),  # Custom colors for the legend
+    labels = c("Congruent", "Incongruent", "No Cue")  # Custom labels
+  ) +
+  
+  # Custom linetype scale (linked to same variable)
+  scale_linetype_manual(
+    values = c("solid", "solid", "dashed"),  # Linetypes
+    labels = c("Congruent", "Incongruent", "No Cue")  # Ensure labels match color legend
+  ) +
+  
+  # Combine the color and linetype legends into one
+  guides(
+    color = guide_legend(title = "Cue Congruency", 
+                         override.aes = list(linetype = c("solid", "solid", "dashed"))),
+    linetype = "none"  # Hide the separate linetype legend
+  ) +
+  
+  # APA style theme adjustments
+  theme(legend.position = "top",             # Remove legend 
+        panel.grid.major = element_blank(),   # Remove grid lines
+        panel.grid.minor = element_blank(),   # Remove minor grid lines
+        axis.line = element_line(size = 0.5, color = "black") # Add axis lines for clarity
+  )
+
+```
+
+(ref:Title-FigureContingentCapture-Catego) **Study 1: Involuntary contingent capture of attention**.  
+
+#### General Model Parameters for Accuracy
+
+The conditional R² of this model suggests that `r round((perf_Accuracy_ModFinal[1, "R2_conditional"]*100), digits = 1)`% of the total variance in the model is explained by both fixed and random effects combined. More specifically, a moderate portion of the total variance is explained solely by random effects (CCI = `r round((perf_Accuracy_ModFinal[1, "ICC"]*100), digits = 1)`%), while fixed effects alone explain only `r round((perf_Accuracy_ModFinal[1, "R2_marginal"]*100), digits = 1)`% of the total variance in response accuracy. In these analyses, the thresholds for data outlier removal correspond to lever values greater than 0.80 and Cook's distances greater than 1.30. The final dataset consists of *k* = `r nrow(df_Catego_NoNeut_Prereg_Excl_Acc_Out)` trials.
+
+
+#### Exploratory analyses: General Model Parameters for Response Times
+
+To analyze the influence of sound occurrence on response times, the final dataset included *k* = `r nrow(df_Catego_ThTo_Prereg_Excl_Out)` trials. The analyses revealed that `r round((perf_RT_ModFinal_ThTo_02[1, "R2_conditional"]*100), digits = 1)`% of the total variance in the data is explained by our model, which includes both fixed and random effects. Additionally, `r round((perf_RT_ModFinal_ThTo_02[1, "ICC"]*100), digits = 1)`% of the variance is explained by random effects, while `r round((perf_RT_ModFinal_ThTo_02[1, "R2_marginal"]*100), digits = 1)`% is explained by fixed effects. 
+In these analyses, the thresholds for data outlier removal correspond to lever values greater than 0.30 and Cook's distances greater than 0.23.
+
+
+#### Exploratory analyses: General Model Parameters for Acccuracy
+
+The final dataset used to analyze the influence of sound occurrence on response accuracy consists of *k* = `r nrow(df_Catego_ThTo_Prereg_Excl_Acc_Out)` trials. Our final model explains `r round((perf_Accuracy_ModFinal_ThTo[1, "R2_conditional"]*100), digits = 1)`% of the total variance in the data, with `r round((perf_Accuracy_ModFinal_ThTo[1, "ICC"]*100), digits = 1)`% attributed to random effects and `r round((perf_Accuracy_ModFinal_ThTo[1, "R2_marginal"]*100), digits = 1)`% to fixed effects.
+In these analyses, the thresholds for data outlier removal correspond to lever values greater than 0.35 and Cook's distances greater than 0.70.

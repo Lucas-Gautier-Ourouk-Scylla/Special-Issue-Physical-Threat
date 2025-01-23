@@ -1,0 +1,406 @@
+---
+title: "Threat_Special_Issue_Discussion"
+author: "Gautier Lucas O.S."
+date: "2025-01-23"
+bibliography: [bibliography.bib, book.bib, packages.bib]
+link-citations: yes
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r Package loading-Exp3, include = FALSE}
+
+rm(list=ls()) # Clear the environment
+
+require(pacman)
+
+p_load(tinytex, knitr, kableExtra, readr, dplyr, tidyverse, Hmisc, mada, party, pdp, psych, lmerTest, mice, VIM, missForest, lavaan, semPlot, lattice, sjPlot, sjtable2df, broom.mixed, performance, insight, MVN, ggplot2, rsq, viridis, hrbrthemes)
+
+load("EnvironmentSaving/Part1_Menace/Dataframes_Catego_Locate_LocStd2.RData")
+
+
+rounding2 <- function(r){
+  round(r, digits = 2) 
+}
+
+rounding0 <- function(r){
+  round(r, digits = 0) 
+}
+
+pValue <- function(p){
+  ifelse((p)<= 0.001 ,"< 0.001", 
+         ifelse((p)<= 0.01 ,"< 0.01", 
+                paste0("= ", round((p), digit = 3))))
+}
+
+
+```
+
+
+
+# General discussion
+
+The objective of these three studies was to test the influence of a physical threat on attentional selection of information devoid of aversive features.
+To achieve this, we used the Threat of Scream paradigm [@beaurenautThreatScreamParadigm2020] to induce a threat state during the completion of a spatial cueing task [@folkSelectivityDistractionIrrelevant1998; @posnerOrientingAttention1980].
+In some blocks, distress screams occurred randomly, which resulted in increased self-reported anxiety among participants.
+In the face of imminent danger, the organism adopts heightened attentional vigilance and a state of action readiness, enabling quicker responses to the threat [@richardsExploringFunctionSelective2014].
+This expedited information processing is evident in the main effect of threat observed in Study 2 and replicated in Study 3.
+In Study 2, where the effect of threat was not confounded by trial block order, the screams reduced reaction times by approximately 7 ms.
+This main effect of threat was only observed in studies employing localization tasks, suggesting that it might result from sensorimotor facilitation rather than a purely attentional effect.
+Moreover, this sensorimotor acceleration appears specific to *physical threats*, as no such effect has been reported in the context of *self-evaluative threats* [@normandDoesEvaluativePressure2014].
+Thus, the speed of response execution may represent a fundamental difference between threats to the ego and those to physical integrity.
+
+
+However, beyond response acceleration, prior research on ego-threatening situations has demonstrated enhanced attentional selectivity.
+According to this literature, our hypotheses proposed that the occurrence of screams would increase attention allocated to distractors congruent with task goals and decrease attention allocated to distractors incongruent with task goals.
+However, our pre-registered analyses did not reveal an effect of physical threat on attentional selectivity.
+Across these three studies, threat did not modulate the contingent capture of attention, whether in reaction times or response accuracy (although a marginal effect supporting our hypotheses was observed in Study 2 for response accuracy).
+Moreover, this effect was not observed in the third study, where the experimental procedure provided participants with perceived control over the threat (i.e., by making them believe that the screams were tied to their performance on the main task).
+Nevertheless, threat effects on attentional selectivity have been observed in both self-evaluative threat contexts [@chajutSelectiveAttentionImproves2003; @huguetSocialPresenceEffects1999; @mullerFocusingEffectSelfevaluation2007; @normandDoesEvaluativePressure2014] and paradigms involving physical threat procedures such as shocks [@huThreatBodilyHarm2012; @kimInfluenceThreatEfficiency2021].
+Thus, if physical threat paradigms are sufficient to induce attentional narrowing, the absence of the predicted effects in our studies may stem from differences in the intensity of threat induction, rather than qualitative distinctions between the types of threat.
+
+
+Indeed, our third study suggests that the evaluative nature of the task may elicit higher levels of anxiety compared to a standard Threat of Scream paradigm. 
+Specifically, when participants believe that the screams are tied to their performance on the main task, they report greater anxiety following the *Threat* block than when they believe the screams occur randomly. 
+This indicates that the evaluative aspect of a task can amplify the apprehension caused by the unpredictable occurrence of distress screams.
+If the intensity of the threat is indeed linked to the degree of enhancement in attentional selectivity, it is possible that the Threat f Scream induction in our studies was not strong enough to produce such an enhancement. 
+However, our data show that self-reported anxiety levels do not significantly modulate attentional selectivity (see Supplementary Analyses). 
+As such, our findings provide little support for the idea that the selectivity effect depends on threat intensity.
+Consequently, the failure to replicate previous effects does not appear to result from a weak anxiety manipulation as measured through self-report scales. 
+Nonetheless, further research is required to examine the effect of threat intensity using physiological measures of anxiety, as dissociations with self-reported measures are sometimes observed [@lazarusTheoryBasedStressMeasurement1990; @vaessenAssociationSelfreportedStress2021; @weinsteinDefensiveStyleDiscrepancy1968].
+
+
+Finally, the divergent results between our studies and the study of @normandDoesEvaluativePressure2014 may stem from differences in the operationalization of the spatial cueing task, instead of theoretical differences between threats. Comparing the spatial cueing tasks used in these research reveals three key discrepancies that may account for the differing results: the duration of stimuli presentation, the spatial arrangement of targets, and the attentional competition between targets.
+
+
+## Stimulus Presentation Time
+
+First, the stimuli presentation times were different in these studies. Specifically, the distractor cue was displayed for 50 ms in our studies versus 30 ms in the original, and the Cue Target Onset Asynchrony (CTOA) was 100 ms compared to 50 ms. Consequently, the total duration from cue onset to target appearance was 150 ms in our studies and 80 ms in the original. While our durations align with those used by Folk and Remington to demonstrate the contingent capture effect [@folkSelectivityDistractionIrrelevant1998], these longer durations may have reduced the influence of threat on attentional capture.
+
+Extensive research on involuntary attention capture highlights that the delay between the presentation of a distractor cue and the appearance of the target significantly impacts response times in visual search tasks [@kleinInhibitionReturn2000; @posnerComponentsVisualOrienting1984]. While shorter CTOAs typically produce a facilitating effect of the distractor cue, longer CTOAs tend to result in an inhibitory effect. Specifically, for longer CTOAs, participants respond more slowly to valid distractor cues (i.e., when the distractor and target appear in the same location) than to invalid ones (i.e., when they appear in different locations).
+Although this inhibition of return effect (or *Inhibitory after-effect*) typically emerges around 200 ms in simple cueing tasks [@kleinInhibitionReturn2000; @posnerComponentsVisualOrienting1984], various factors, including the cognitive resources required by the task [@briandInhibitionReturnManual2000; @lupianezDoesIOROccur1997], the situational context [@gobelSocialBeliefsVisual2018], and attentional settings [@andersonVariationsMagnitudeAttentional2010; @folkBottomupPrimingTopdown2008; @lamyEffectsTaskRelevance2004; @lupianezInhibitionReturnAttentional1999], can modulate the timing of this effect. 
+Regarding attention set specifically, studies on contingent capture have demonstrated inhibition of return effects at durations comparable to those in our studies (i.e., 150 ms). 
+In these studies, while task-relevant congruent cues exhibit the classic cueing effect, incongruent cues trigger inhibition of return, with participants responding more slowly to valid incongruent cues compared to invalid ones. 
+This finding suggests difficulty in reorienting attention to a recently inhibited location.
+
+In our studies, it is plausible that the distress screams, by modulating attentional priorities, influenced the timing of inhibition of return. 
+Theoretical predictions propose that the greater the attentional weight assigned to a stimulus, the more delayed the onset of inhibition of return [@kleinInhibitionReturn2000]. 
+This aligns with our hypothesis that threat increases the attentional weight of congruent stimuli, potentially delaying the onset of inhibition of return for these stimuli and allowing the classic facilitation effects to manifest under threat conditions.
+However, given findings suggesting that threat can broadly enhance inhibitory processes [@huThreatBodilyHarm2012; @robinsonImpactInducedAnxiety2013], it is also possible that the distress screams triggered an earlier onset of inhibition for all cues, rather than fostering attentional selectivity based on cue congruence. 
+By accelerating the onset of inhibition of return, threat may have obscured facilitation effects in studies with longer cue–target intervals (i.e., 150 ms), whereas this would not have impacted studies using shorter intervals (i.e., 80 ms).
+
+
+
+```{r Lateralisation-Effect, include=FALSE}
+
+## Study 1
+
+df_Catego <- df_Catego %>%
+  mutate(Lateralization_str = case_when(Target_Position == "top" ~ "Vertical",
+                                    Target_Position == "bottom" ~ "Vertical",
+                                    Target_Position == "left" ~ "Horizontal",
+                                    Target_Position == "right" ~ "Horizontal"),
+         Lateralization = case_when(Target_Position == "top" ~ -0.5,
+                                    Target_Position == "bottom" ~ -0.5,
+                                    Target_Position == "left" ~ +0.5,
+                                    Target_Position == "right" ~ +0.5))
+
+Lmer_Lateral_Catego <- lmer(RT ~ Lateralization +
+               (Lateralization || response_id),
+             data = df_Catego)
+
+summary(Lmer_Lateral_Catego)
+coefs_Lmer_Lateral_Catego <- data.frame(coef(summary(Lmer_Lateral_Catego)))
+
+## Study 2
+
+df_Locate <- df_Locate %>%
+  mutate(Lateralization_str = case_when(Target_Position == "top" ~ "Vertical",
+                                    Target_Position == "bottom" ~ "Vertical",
+                                    Target_Position == "left" ~ "Horizontal",
+                                    Target_Position == "right" ~ "Horizontal"),
+         Lateralization = case_when(Target_Position == "top" ~ -0.5,
+                                    Target_Position == "bottom" ~ -0.5,
+                                    Target_Position == "left" ~ +0.5,
+                                    Target_Position == "right" ~ +0.5))
+
+Lmer_Lateral_Locate <- lmer(RT ~ Lateralization +
+               (Lateralization || response_id),
+             data = df_Locate)
+
+summary(Lmer_Lateral_Locate)
+coefs_Lmer_Lateral_Locate <- data.frame(coef(summary(Lmer_Lateral_Locate)))
+
+## Study 3
+
+df_LocStd2 <- df_LocStd2 %>%
+  mutate(Lateralization_str = case_when(Target_Position == "top" ~ "Vertical",
+                                    Target_Position == "bottom" ~ "Vertical",
+                                    Target_Position == "left" ~ "Horizontal",
+                                    Target_Position == "right" ~ "Horizontal"),
+         Lateralization = case_when(Target_Position == "top" ~ -0.5,
+                                    Target_Position == "bottom" ~ -0.5,
+                                    Target_Position == "left" ~ +0.5,
+                                    Target_Position == "right" ~ +0.5))
+
+Lmer_Lateral_LocStd2 <- lmer(RT ~ Lateralization +
+               (Lateralization || response_id),
+             data = df_LocStd2)
+
+summary(Lmer_Lateral_LocStd2)
+coefs_Lmer_Lateral_LocStd2 <- data.frame(coef(summary(Lmer_Lateral_LocStd2)))
+
+```
+
+## Lateralization of Stimuli
+
+
+Next, the difference in target arrangement between our studies and the original study may help explain the result discrepancies. In our study, cues and targets appeared in placeholders arranged at the top, bottom, left, and right of the screen. 
+In Normand et al.'s study (2014), the placeholders were diagonally arranged at each corner of the screen. 
+These layout differences may have influenced response lateralization processes.
+
+Indeed, many studies using the Simon task suggest that the lateralization of a target automatically triggers a motor response on the side of the target [@leutholdSimonEffectCognitive2011]. 
+Our data also show that lateralization plays a significant role in response times, with participants responding faster when the target appears on the left or right than when it appears at the top or bottom (study 2: *b* = `r round(coefs_Lmer_Lateral_Locate["Lateralization", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(Lmer_Lateral_Locate, type = "ml1")[["Lateralization"]], digit =0)`) =
+`r round(coefs_Lmer_Lateral_Locate["Lateralization", "t.value"], digits = 2)`, *p* `r  pValue(coefs_Lmer_Lateral_Locate["Lateralization", "Pr...t.."])`; study 3: *b* = `r round(coefs_Lmer_Lateral_LocStd2["Lateralization", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(Lmer_Lateral_LocStd2, type = "ml1")[["Lateralization"]], digit =0)`) =
+`r round(coefs_Lmer_Lateral_LocStd2["Lateralization", "t.value"], digits = 2)`, *p* `r  pValue(coefs_Lmer_Lateral_LocStd2["Lateralization", "Pr...t.."])`). 
+
+Furthermore, both our work and the original study show that threat affects response speed and selectivity more in simple search tasks than in compound search tasks. 
+This suggests that physical threat may impact response selection processes more than purely attentional processes. 
+If threat strengthens sensorimotor processes, the effect may have been potentiated in Normand et al.'s studies, where all targets were laterally presented, compared to our studies where only two out of four targets were lateralized. 
+
+
+```{r ValidityEffect-Incongruent-Control, include=FALSE}
+
+load(file = "EnvironmentSaving/Part1_Menace/df_Locate_MainAnalysis.RData")
+
+df_Locate_NoNeut_Prereg_Excl_RT_Out <- df_Locate_NoNeut_Prereg_Excl_RT_Out %>%
+  mutate(SimpEffect_Congru = case_when(Congruency == "Congruent" ~ 0, 
+                                       Congruency == "Incongruent" ~ 1), 
+         SimpEffect_InCongru = case_when(Congruency == "Congruent" ~ 1, 
+                                         Congruency == "Incongruent" ~ 0)) %>%
+  mutate(SimpEffect_Control = case_when(Block == "Control" ~ 0, 
+                                        Block == "Threat" ~ 1), 
+         SimpEffect_Threat = case_when(Block == "Control" ~ 1, 
+                                       Block == "Threat" ~ 0))
+
+# Simple effect of validity in incongruent trials in control condition
+
+RT_SimpEffect_Incong_Control <- lmer(RT ~ SimpEffect_InCongru*Validity_C*SimpEffect_Control +
+                                       (SimpEffect_InCongru + SimpEffect_Control || response_id),
+                                     data = df_Locate_NoNeut_Prereg_Excl_RT_Out)
+
+# Save the model
+
+summary(RT_SimpEffect_Incong_Control)
+coefs_RT_SimpEffect_Incong_Control <- data.frame(coef(summary(RT_SimpEffect_Incong_Control)))
+
+```
+
+
+## Concurrence des stimuli
+
+Finally, while the task of Normand et al.'s involved two colored targets appearing simultaneously on the screen, our three studies presented only one colored target at a time.
+In both our three studies and Folk and Remington's one, participants performed a simple luminance-detection task in which a single luminous target appears on the screen. 
+Because the target is highly distinctive from the rest of the screen, it occupies a prominent place on the attentional saliency map.
+
+In contrast, Normand et al.'s task featured a colored target accompanied by a colored distractor, which could capture attention similarly to an additional singleton. 
+Since two colored targets appear simultaneously, the target's distinctiveness is not sufficient to facilitate its detection. 
+As a result, individuals must adjust their attention to prioritize the target color [@luckProgressResolvingAttentional2021]. 
+Thus, participants develop an attentional calibration that both amplifies the congruent color for task-goals and inhibits the incongruent color. 
+The competition between targets in the original study may have led to different attention settings than that used by participants in our studies.
+
+According to our hypothesis, if threat enhances attentional selectivity, it should impact both attentional amplification and inhibition processes [@leeEmotionalArousalAmplifies2014; @matherArousalBiasedCompetitionPerception2011]. 
+Thus, the effect of threat should be more significant in a situation where participants inhibit a singleton distractor (i.e., when two colored targets are in competition) compared to a situation where the target is highly distinctive (i.e., when the target is the only colored stimulus on the screen). 
+
+
+```{r Nrow-Study1and2, include=FALSE}
+
+#### Study 1
+
+Accuracy_Df_Catego <- df_Catego %>%
+  group_by(response_id) %>%
+  summarise(Accuracy_Rate=(length(which(Response_Status == 1))/length(response_id)), n=length(response_id))
+
+df_Catego <- left_join(df_Catego, Accuracy_Df_Catego)
+df_Catego <- df_Catego %>% select(-n)
+
+df_Catego_NoNeut_Prereg_Excl <- df_Catego %>%
+  filter(Congruency != "NoCongruency") %>%
+  filter(Block != "Toon") %>%
+  filter(Response_Status != 3) %>%
+  filter(Response_Status != 2) %>%
+  filter((RT >= median(RT)-3*mad(RT)) & (RT <= median(RT)+3*mad(RT))) %>%
+  filter(Accuracy_Rate !=0) %>%
+  filter((Accuracy_Rate >= median(Accuracy_Rate)-3*mad(Accuracy_Rate)))
+
+
+#### Study 2
+
+Accuracy_Df_Locate <- df_Locate %>%
+  group_by(response_id) %>%
+  summarise(Accuracy_Rate=(length(which(Response_Status == 1))/length(response_id)), n=length(response_id))
+
+df_Locate <- left_join(df_Locate, Accuracy_Df_Locate)
+df_Locate <- df_Locate %>% select(-n)
+
+df_Locate_NoNeut_Prereg_Excl <- df_Locate %>%
+  filter(Congruency != "NoCongruency") %>%
+  filter(Block != "Toon") %>%
+  filter(Response_Status != 3) %>%
+  filter(Response_Status != 2) %>%
+  filter((RT >= median(RT)-3*mad(RT)) & (RT <= median(RT)+3*mad(RT))) %>%
+  filter((Accuracy_Rate >= median(Accuracy_Rate)-3*mad(Accuracy_Rate)))
+
+
+#### Study 3
+
+Accuracy_Df_LocStd2 <- df_LocStd2 %>%
+  group_by(response_id) %>%
+  summarise(Accuracy_Rate=(length(which(Response_Status == 1))/length(response_id)), n=length(response_id))
+
+df_LocStd2 <- left_join(df_LocStd2, Accuracy_Df_LocStd2)
+df_LocStd2 <- df_LocStd2 %>% select(-n)
+
+df_LocStd2_NoNeut_Prereg_Excl <- df_LocStd2 %>%
+  filter(Congruency != "NoCongruency") %>%
+  filter(Block != "Toon") %>%
+  filter(Response_Status != 3) %>%
+  filter(Response_Status != 2) %>%
+  filter((RT >= median(RT)-3*mad(RT)) & (RT <= median(RT)+3*mad(RT))) %>%
+  filter((Accuracy_Rate >= median(Accuracy_Rate)-3*mad(Accuracy_Rate)))
+
+```
+
+
+## Reinforcement of attentional selectivity under threat
+
+In our three studies, it is possible that a) stimulus presentation durations, b) spatial arrangement of placeholders, and c) attentional competition between stimuli, collectively limited the effect of threat on attentional selectivity. 
+While not entirely eliminating the threat effect, as Study 2 shows a marginal triple interaction effect on response accuracy, task differences with the original study may have reduced the threat effect size. 
+However, exploratory analyses support the hypothesis of enhanced attentional selectivity under threat.
+
+
+Combining data from blocks where participants heard distress screams and human vocalizations, analyses show a robust 3-way interaction effect across studies. 
+In Studies 1 and 2, threat impacts contingent capture effect on response times (a marginal effect in both studies) and response accuracy (a marginal effect in Study 1, but significant in Study 2). 
+Although not observed in Study 3, consistent replication of the effect in the first two studies suggests that unpredictable distress screams and human vocalizations enhance the involuntary contingent capture of attention.
+
+Regarding response times, the occurrence of sounds leads to greater capture from the distractor cue when its color matches the target. 
+When participants must locate or categorize a green target appearing at the same location as a green cue (i.e., valid cue), they respond faster if sounds are likely to occur randomly. 
+Conversely, when the green target appears at a different location from the green cue (i.e., invalid cue), participants respond slower if sounds are likely to occur randomly. 
+Since the cue has an even greater influence on response times when sounds occur, regardless of valid or invalid location, these results suggest increased attentional capture of a congruent cue for task-goals.
+
+Additionally, unpredictable sounds during the task also reduce capture of the distractor cue when its color is incongruent task-goals. 
+In this situation, the difference in response times between valid and invalid trials is partially reduced when sounds are heard compared a condition without sounds. 
+Similar effects appear in task error analysis. 
+Furthermore, since effects are observed under both a simple search instruction and a compound search instruction, results suggest that sound occurrence influence not only sensorimotor processes but also attentional processes.
+
+
+## Physical threat and uncertainty
+
+Taken together, these results suggest that when sounds unpredictably happen during a spatial cueing task, involuntary attentional capture by distractors congruent with task-goals is increased, while attentional capture by distractors incongruent with task-goals is reduced. 
+These findings provide evidence for the hypothesis of heightened goal-driven attentional selectivity under threat.
+
+However, these studies raise the question of the specificity of threat in generating such attentional narrowing. 
+Indeed, the modulation of attentional selectivity was only obtained after aggregating the *Threat* and *Vocalize* blocks. 
+This aggregation was performed because the behavioral data from these two blocks did not significantly differ in our studies, and equivalence analyses revealed that the influence of sound type was significantly smaller than an unstandardized effect size of 9.76 ms.
+Based on these results, it is conceivable that the attentional selectivity observed in our studies is not due to the aversive nature of distress screams but rather their unpredictability. 
+According to numerous theories, the inability to predict with certainty the future occurrence of an aversive event constitutes a fundamental component of anxiety [@abbottPredictableUnpredictableShock1984; @schmitzAssessingFearAnxiety2012]. 
+Therefore, it is plausible that the unpredictability of the vocalizations, although not threatening, was sufficient to induce a state of anxious arousal in our studies.
+Our data support this proposition by showing that the sense of threat generated by vocalizations predicts the increase in anxiety similarly to the sense of threat generated by screams. 
+
+This hypothsesis of anxiety activation triggered by the unpredictability of sounds would explain the absence of behavioral differences between *Threat* and *Vocalize* conditions. 
+Nevertheless, the sound level of the stimuli may also have played a role in enhancing attentional selectivity, as participants reporting hearing the sounds at an unpleasant intensity showed a greater increase in anxiety during experimental blocks.
+
+
+## Conclusion 
+
+
+These three studies tested the effect of a physical threat on attentional selectivity within a spatial cueing task. 
+Our pre-registered analyses did not conclude that the occurrence of aversive auditory stimuli (i.e., distress screams) was likely to modulate the selection of visual information. 
+However, additional analyses suggest that the uncertainty related to the occurrence of auditory events leads to an enhancement of attentional selection. 
+This is reflected in greater attention to visual elements that correspond to features voluntarily sought by the individual, and less attention to visual elements that do not share these features. 
+Research are needed to provide more evidence to this effect, but these studies partially replicate previous literature showing a reinforcement of attentional selectivity in threatening situations.
+
+
+
+
+
+# Supplementary
+
+## Supplementary : Discussion
+
+### Effect of self-reported anxiety on contingent capture
+
+```{r Loading-Anxiety-3way, echo=FALSE}
+# Load results of the 3 way interaction using self reported anxiety 
+
+# Study 1
+## Accuracy
+load(file = "EnvironmentSaving/Part1_Menace/Acc_Anxiety_01_cov_Catego.RData")
+coefs_Acc_Anxiety_01_cov_Catego <- data.frame(coef(summary(Acc_Anxiety_01_cov_Catego)))
+
+## RT
+load(file = "EnvironmentSaving/Part1_Menace/RT_Anxiety_01_cov_Catego.RData")
+coefs_RT_Anxiety_01_cov_Catego <- data.frame(coef(summary(RT_Anxiety_01_cov_Catego)))
+
+# Study 2
+## Accuracy
+load(file = "EnvironmentSaving/Part1_Menace/Acc_Anxiety_01_cov_Locate.RData")
+coefs_Acc_Anxiety_01_cov_Locate <- data.frame(coef(summary(Acc_Anxiety_01_cov_Locate)))
+
+## RT
+load(file = "EnvironmentSaving/Part1_Menace/RT_Anxiety_01_cov_Locate.RData")
+coefs_RT_Anxiety_01_cov_Locate <- data.frame(coef(summary(RT_Anxiety_01_cov_Locate)))
+
+# Study 3
+## Accuracy
+load(file = "EnvironmentSaving/Part1_Menace/Acc_Anxiety_01_cov_LocStd2.RData")
+coefs_Acc_Anxiety_01_cov_LocStd2 <- data.frame(coef(summary(Acc_Anxiety_01_cov_Locate)))
+
+## RT
+load(file = "EnvironmentSaving/Part1_Menace/RT_Anxiety_01_cov_LocStd2.RData")
+coefs_RT_Anxiety_01_cov_LocStd2 <- data.frame(coef(summary(RT_Anxiety_01_cov_LocStd2)))
+
+```
+
+When the experimental condition (*Control* vs. *Threat* vs. *Vocalization*) is replaced by the increase in anxiety following the block, the 3-way interaction effect is not significant for reaction times (Study 1: *b* = `r rounding2(coefs_RT_Anxiety_01_cov_Catego["Evol_Anxiety_Mean", "Estimate"])`,
+*t*(`r rounding0(get_df(RT_Anxiety_01_cov_Catego, type = "ml1")[["Evol_Anxiety_Mean"]]*3)`) =
+`r rounding2(coefs_RT_Anxiety_01_cov_Catego["Evol_Anxiety_Mean", "t.value"])`, *p* `r  pValue(coefs_RT_Anxiety_01_cov_Catego["Evol_Anxiety_Mean", "Pr...t.."])`; study 2: *b* = `r rounding2(coefs_RT_Anxiety_01_cov_Locate["Evol_Anxiety_Mean", "Estimate"])`,
+*t*(`r rounding0(get_df(RT_Anxiety_01_cov_Locate, type = "ml1")[["Evol_Anxiety_Mean"]]*3)`) =
+`r rounding2(coefs_RT_Anxiety_01_cov_Locate["Evol_Anxiety_Mean", "t.value"])`, *p* `r  pValue(coefs_RT_Anxiety_01_cov_Locate["Evol_Anxiety_Mean", "Pr...t.."])`; study 3: *b* = `r rounding2(coefs_RT_Anxiety_01_cov_LocStd2["Evol_Anxiety_Mean", "Estimate"])`,
+*t*(`r rounding0(get_df(RT_Anxiety_01_cov_LocStd2, type = "ml1")[["Evol_Anxiety_Mean"]]*3)`) =
+`r rounding2(coefs_RT_Anxiety_01_cov_LocStd2["Evol_Anxiety_Mean", "t.value"])`, *p* `r  pValue(coefs_RT_Anxiety_01_cov_LocStd2["Evol_Anxiety_Mean", "Pr...t.."])`) or response accuracy (study 1: *b* = `r rounding2(coefs_Acc_Anxiety_01_cov_Catego["Evol_Anxiety_Mean", "Estimate"])`,
+*Z*(`r rounding0(get_df(Acc_Anxiety_01_cov_Catego, type = "ml1")[["Evol_Anxiety_Mean"]]*3)`) =
+`r rounding2(coefs_Acc_Anxiety_01_cov_Catego["Evol_Anxiety_Mean", "z.value"])`, *p* `r  pValue(coefs_Acc_Anxiety_01_cov_Catego["Evol_Anxiety_Mean", "Pr...z.."])`; study 2: *b* = `r rounding2(coefs_Acc_Anxiety_01_cov_Locate["Evol_Anxiety_Mean", "Estimate"])`,
+*Z*(`r rounding0(get_df(Acc_Anxiety_01_cov_Locate, type = "ml1")[["Evol_Anxiety_Mean"]]*3)`) =
+`r rounding2(coefs_Acc_Anxiety_01_cov_Locate["Evol_Anxiety_Mean", "z.value"])`, *p* `r  pValue(coefs_Acc_Anxiety_01_cov_Locate["Evol_Anxiety_Mean", "Pr...z.."])`; study 3: *b* = `r rounding2(coefs_Acc_Anxiety_01_cov_LocStd2["Evol_Anxiety_Mean", "Estimate"])`,
+*Z*(`r rounding0(get_df(Acc_Anxiety_01_cov_LocStd2, type = "ml1")[["Evol_Anxiety_Mean"]]*3)`) =
+`r rounding2(coefs_Acc_Anxiety_01_cov_LocStd2["Evol_Anxiety_Mean", "z.value"])`, *p* `r  pValue(coefs_Acc_Anxiety_01_cov_LocStd2["Evol_Anxiety_Mean", "Pr...z.."])`).
+These results suggest that self-reported anxiety levels do not significantly modulate attentional selectivity.
+
+
+### Effect of sound intensity on self-reported anxiety
+
+```{r Load-Survey-Results, include=FALSE}
+
+load("EnvironmentSaving/Part1_Menace/Survey_Analysis_Catego_2024-10-08.RData")
+
+load("EnvironmentSaving/Part1_Menace/Survey_Analysis_Location_2024-10-08.RData")
+
+load("EnvironmentSaving/Part1_Menace/Survey_Analysis_Ctrbillity_2024-11-13.RData")
+
+
+```
+
+In our three studies, participants who reported hearing the sounds at an unpleasant volume showed a greater increase in anxiety compared to those who did not report hearing the sounds at an unpleasant level (study 1: *b* =
+`r round(Report_Sound_Unpleasant_lm01_Catego$coefficients[2,1], digits = 2)`,
+*F*(`r Report_Sound_Unpleasant_lm01_Catego$df[1]-Report_Sound_Unpleasant_lm01_Catego[["fstatistic"]][["numdf"]]`, `r Report_Sound_Unpleasant_lm01_Catego$df[2]`) =
+`r round(Report_Sound_Unpleasant_lm01_Catego$coefficients[2,3], digits = 2)`, *p* `r pValue(Report_Sound_Unpleasant_lm01_Catego$coefficients[2,4])`, η² = `r round(rsq(Sound_Unpleasant_lm01_Catego)[[1]], digit = 3)`; study 2: *b* =
+`r round(Report_Sound_Unpleasant_lm01_Location$coefficients[2,1], digits = 2)`,
+*F*(`r Report_Sound_Unpleasant_lm01_Location$df[1]-Report_Sound_Unpleasant_lm01_Location[["fstatistic"]][["numdf"]]`, `r Report_Sound_Unpleasant_lm01_Location$df[2]`) =
+`r round(Report_Sound_Unpleasant_lm01_Location$coefficients[2,3], digits = 2)`, *p* `r pValue(Report_Sound_Unpleasant_lm01_Location$coefficients[2,4])`, η² = `r round(rsq(Sound_Unpleasant_lm01_Location)[[1]], digit = 3)`; study 3: *b* =
+`r round(Report_Sound_Unpleasant_lm01_Ctrbillity$coefficients[2,1], digits = 2)`,
+*F*(`r Report_Sound_Unpleasant_lm01_Ctrbillity$df[1]-Report_Sound_Unpleasant_lm01_Ctrbillity[["fstatistic"]][["numdf"]]`, `r Report_Sound_Unpleasant_lm01_Ctrbillity$df[2]`) =
+`r round(Report_Sound_Unpleasant_lm01_Ctrbillity$coefficients[2,3], digits = 2)`, *p* `r pValue(Report_Sound_Unpleasant_lm01_Ctrbillity$coefficients[2,4])`, η² = `r round(rsq(Sound_Unpleasant_lm01_Ctrbillity)[[1]], digit = 3)`).

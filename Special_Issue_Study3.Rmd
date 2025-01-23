@@ -1,0 +1,498 @@
+---
+title: "Threat_Special_Issue_Study3"
+author: "Gautier Lucas O.S."
+date: "2025-01-22"
+bibliography: [bibliography.bib, book.bib, packages.bib]
+link-citations: yes
+output:
+  html_document: default
+  word_document: default
+---
+
+```{r Package loading-Exp3, include = FALSE}
+
+rm(list=ls()) # Clear the environment
+
+require(pacman)
+
+p_load(tinytex, knitr, kableExtra, readr, dplyr, tidyverse, Hmisc, mada, party, pdp, psych, lmerTest, mice, VIM, missForest, lavaan, semPlot, lattice, sjPlot, sjtable2df, broom.mixed, performance, insight, MVN, ggplot2, rsq, viridis, hrbrthemes)
+
+load("EnvironmentSaving/Part1_Menace/Task_Ctrbillity_2024-11-22.RData")
+
+load("EnvironmentSaving/Part1_Menace/Task_LocStd2_2025-01-10.RData")
+
+load("EnvironmentSaving/Part1_Menace/Survey_Analysis_Ctrbillity_2024-11-13.RData")
+
+load("EnvironmentSaving/Part1_Menace/Dataframes_Catego_Locate.RData")
+
+rounding2 <- function(r){
+  round(r, digits = 2) 
+}
+
+rounding0 <- function(r){
+  round(r, digits = 0) 
+}
+
+pValue <- function(p){
+  ifelse((p)<= 0.001 ,"< 0.001", 
+         ifelse((p)<= 0.01 ,"< 0.01", 
+                paste0("= ", round((p), digit = 2))))
+}
+
+
+```
+
+
+The aim of this study is to examine the effect of threat controllability on the enhancement of attentional selectivity. 
+Participants performed a spatial cueing task similar to those used in Studies 1 and 2, in which distress screams could occur periodically. 
+However, in Study 3, some participants are informed that the occurrence of screams is directly linked to their task performance [@houstonControlStressLocus1972]. 
+This performance-threat relationship suggest perceived instrumental control, as better task performance reduce the frequency of screams. 
+Conversely, other participants are told that the screams occurre randomly, implying low control since the screams are unrelated to task performance.
+
+If threat controllability enhances attentional selectivity, we expect participants to focus more on cues aligned with their attention set and less on misaligned cues. 
+Specifically, for task-congruent cues, the interference effect between valid and invalid trials should be greater when participants perceive control over the threat compared to when they do not. 
+Conversely, for task-incongruent cues, we predict reduced interference in the controllable condition compared to the uncontrollable condition. 
+In summary, we anticipate a stronger contingent capture effect in the controllable threat condition relative to the uncontrollable one.
+However, if the observed enhancement of attentional selectivity is driven more by the uncertainty of scream occurrence rather than controllability, we would not expect differences in the contingent capture effect between controllable and uncontrollable conditions.
+
+The pre-registration of the study hypotheses is available on OSF:  <https://osf.io/jaqy9>.
+
+
+## Method
+
+### Population
+
+
+In this study, the pre-registered sample size was *N* = 250 participant.e.s. 
+The sample size calculation method mirrored that used in the previous studies, targeting 95% statistical power, an α threshold of 0.05, and an unstandardized effect size of -8.20 ms for the 3-way interaction
+(Details of the sample size calculation are available in the pre-registration: <https://osf.io/jaqy9>). 
+The final sample consisted of *N* = `r nlevels(df_LocStd2$response_id)` participants after excluding  *n* = `r nlevels(N_No_Sound$response_id)` participants due to sound issues and *n* = 2 participants who did not complete the study. 
+All participants were first and second year undergraduate psychology students from the University of Clermont-Auvergne (France), recruited in exchange for course credits.
+The final sample included `r table(df_Survey_Wide_Ctrbillity$Gender_str)[["Woman"]]` women, `r table(df_Survey_Wide_Ctrbillity$Gender_str)[["Man"]]` men and `r table(df_Survey_Wide_Ctrbillity$Gender_str)[["NoBinary"]]` non-binary individuals (*Mean*~Age~ = `r rounding2(mean(df_Survey_Wide_Ctrbillity$Age))`, *SD*~Age~ = `r rounding2(sd(df_Survey_Wide_Ctrbillity$Age))`, *min* = `r min(df_Survey_Wide_Ctrbillity$Age)`, *max* = `r max(df_Survey_Wide_Ctrbillity$Age)`). 
+Additionally, `r table(df_Survey_Wide_Ctrbillity$PTSD_Diag)[["Diag"]]` participants reported a *PTSD* score exceeding the clinical diagnostic threshold (i.e., > 44).
+
+
+
+### Material and procedure
+
+
+Apart from minor changes, the materials for this study were identical to those used in Studies 1 and 2. 
+The primary difference involved the manipulation of threat controllability, which was introduced through task instructions in a between-subjects design.
+In the controllable condition, participants were informed that their performance would be monitored throughout the task, with an overall score calculated based on their speed, accuracy, and progress.
+They were also told that poor performance could trigger the occurrence of distressing sounds, whereas better performance could reduce their frequency. 
+This led participants to believe they could exert control over the threat (i.e., the occurrence of the sounds) by performing well on the main task.
+In the random condition, participants were similarly informed that their performance would be evaluated during the task. 
+However, they were explicitly told that the occurrence of sounds was unrelated to their performance and occurred randomly. 
+By clarifying that the sounds were independent of their task performance, participants were led to believe they had no control over the threat.
+The exact instructions used to manipulate threat controllability are available in the Supplementary.
+
+
+In this study, participants were informed that the occurrence of sounds was either *controllable* or *random*. 
+However, all participants heard the sounds at the same predetermined moments during the task^[In this study, the timing of the sounds within a trial block was pre-determined. The sequence below indicates the intervals between sounds (in number of trials), with vertical bars marking the moments when sounds occurred: 13 | 8 | 5 | 14 | 7 | 8 | 9 | 14 | 10 | 11 | 6 | 2 | 6 | 3 | 9 | 7 | 4 | 6 | 2.]. 
+Unlike Studies 1 and 2, where block order was counterbalanced across participants, all participants began the experiment with a block containing no sounds (i.e., the *Control* block). Following this, participants were informed that sounds would either occur randomly (*n* = `r table(df_Survey_Wide_Ctrbillity$Task_Type_str)[["Random"]]`) or according to their performance (*n* = `r table(df_Survey_Wide_Ctrbillity$Task_Type_str)[["Controlability"]]`) in subsequent blocks.
+After receiving this information, participants completed a block in which distressing screams were heard (i.e., the *Threat* block), followed by a block where vocalizations were heard (i.e., the *Vocalize* block).
+
+At the end of the study, participants rated their agreement on 2x2 items evaluating the randomness or controllability of the sounds during the task (e.g., "*In this experiment, chance (vs. my performance) was mainly responsible for the occurrence of sounds*" and "*In this experiment, the occurrence of sounds was random (vs. related to my performance)*") on a scale ranging from `1 = Not at all` to `10 = Extremely`. Composite scores for the randomness and controllability of the sounds were calculated by averaging participants’ responses to the two items assessing each concept.
+
+Questions regarding participants' social class or occupation were omitted in this study, as all participants were students. The full material is available on OSF: <https://osf.io/ynuc2/>.
+
+
+
+## Results
+
+#### Effectiveness of Controllability induction
+
+
+Linear regressions confirmed the effectiveness of the manipulation of threat controllability. 
+Participants in the *Controllable* condition perceived that the occurrence of sounds was significantly more related to their performance  (*M* =
+`r rounding2(SenseOfControl_table_Ctrbillity[[1,"Mean"]])`, *ET* =
+`r rounding2(SenseOfControl_table_Ctrbillity[[1,"SD"]])`, *n* = `r SenseOfControl_table_Ctrbillity[[1,"Ppt_Nb"]]`) than participants in the *Random* condition (*M* =
+`r rounding2(SenseOfControl_table_Ctrbillity[[2,"Mean"]])`, *ET* =
+`r rounding2(SenseOfControl_table_Ctrbillity[[2,"SD"]])`, *n* = `r SenseOfControl_table_Ctrbillity[[2,"Ppt_Nb"]]`, *b* =
+`r round(Report_SenseOfControl$coefficients[1,1], digits = 2)`,
+*F*(`r Report_SenseOfControl$df[1]-Report_SenseOfControl[["fstatistic"]][["numdf"]]`, `r Report_SenseOfControl$df[2]`) =
+`r round(Report_SenseOfControl$coefficients[1,3], digits = 2)`, *p* `r pValue(Report_SenseOfControl$coefficients[1,4])`, , η² = `r round(rsq(SenseOfControl)[[1]], digit = 3)`). 
+Conversely, participants in the *Controllable* condition estimated the occurrence of sounds as significantly less random (*M* =
+`r rounding2(SenseOfRandomness_table_Ctrbillity[[1,"Mean"]])`, *ET* =
+`r rounding2(SenseOfRandomness_table_Ctrbillity[[1,"SD"]])`, *n* = `r SenseOfRandomness_table_Ctrbillity[[1,"Ppt_Nb"]]`) than participants in the *Random* condition (*M* =
+`r rounding2(SenseOfRandomness_table_Ctrbillity[[2,"Mean"]])`, *ET* =
+`r rounding2(SenseOfRandomness_table_Ctrbillity[[2,"SD"]])`, *n* = `r SenseOfRandomness_table_Ctrbillity[[2,"Ppt_Nb"]]`, *b* =
+`r round(Report_SenseOfRandomness$coefficients[1,1], digits = 2)`,
+*F*(`r Report_SenseOfRandomness$df[1]-Report_SenseOfRandomness[["fstatistic"]][["numdf"]]`, `r Report_SenseOfRandomness$df[2]`) =
+`r round(Report_SenseOfRandomness$coefficients[1,3], digits = 2)`, *p* `r pValue(Report_SenseOfRandomness$coefficients[1,4])`, , η² = `r round(rsq(SenseOfRandomness)[[1]], digit = 3)`). 
+
+
+Furthermore, participants in the *Controllable* condition exhibited a marginally greater increase in anxiety during the *Threat* block compared to those in the *Random* condition (*b* =
+`r round(Report_Anxiety_Controlabillity_Threat$coefficients[2,1], digits = 2)`,
+*F*(`r Report_Anxiety_Controlabillity_Threat$df[1]-Report_Anxiety_Controlabillity_Threat[["fstatistic"]][["numdf"]]`, `r Report_Anxiety_Controlabillity_Threat$df[2]`) =
+`r round(Report_Anxiety_Controlabillity_Threat$coefficients[2,3], digits = 2)`, *p* `r pValue(Report_Anxiety_Controlabillity_Threat$coefficients[2,4])`, , η² = `r round(rsq(Anxiety_Controlabillity_Threat)[[1]], digit = 3)`). 
+A similar significant effect was observed in the *Vocalize* block (*b* =
+`r round(Report_Anxiety_Controlabillity_Toon$coefficients[2,1], digits = 2)`,
+*F*(`r Report_Anxiety_Controlabillity_Toon$df[1]-Report_Anxiety_Controlabillity_Toon[["fstatistic"]][["numdf"]]`, `r Report_Anxiety_Controlabillity_Toon$df[2]`) =
+`r round(Report_Anxiety_Controlabillity_Toon$coefficients[2,3], digits = 2)`, *p* `r pValue(Report_Anxiety_Controlabillity_Toon$coefficients[2,4])`, η² = `r round(rsq(Anxiety_Controlabillity_Toon)[[1]], digit = 3)`).
+
+These results suggest that the manipulation effectively induced a sense of control among participants who believed the occurrence of screams was tied to their performance. Additionally, it appears that the *Controllable* condition generated greater anxiety in these participants compared to those in the *Random* condition.
+
+
+
+### Behavioral data
+
+#### Statistical Approach
+
+To analyze the effect of threat controllability on response times, we employed mixed models identical to those used in Study 2. 
+However, the variable *Controllability* was entered into the model as a predictor instead of the variable *Threat*. 
+Additionally, since the block order was not counterbalanced among participants in this study, the number of trials completed since the beginning of the experiment was included in the final model. 
+Accounting for the progression of trials during the experiment aimed to control for participants' learning effects (*b* = `r round(coefs_Lmer_time["Counting_Trial", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(Lmer_time, type = "ml1")[["Counting_Trial"]], digit =0)`) =
+`r round(coefs_Lmer_time["Counting_Trial", "t.value"], digits = 2)`, *p* `r  pValue(coefs_Lmer_time["Counting_Trial", "Pr...t.."])`).
+
+
+
+#### Effect of threat controllability
+
+Regarding response times, our analysis reveals no significant main effect of controllability (*b* = `r round(coefs_RT_ModFinal_02_Ctrbillity["Controllability_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_ModFinal_02_Ctrbillity, type = "ml1")[["Controllability_C"]], digit =0)`) =
+`r round(coefs_RT_ModFinal_02_Ctrbillity["Controllability_C", "t.value"], digits = 2)`, *p* `r  pValue(coefs_RT_ModFinal_02_Ctrbillity["Controllability_C", "Pr...t.."])`). 
+Participants appeared to respond with similar speed in the *Controllable* condition (*M* =
+`r round(Mean_RT_Ctrbillity["Controlability", "mean"], digits = 0)` ms,
+*SE* = `r round(Mean_RT_Ctrbillity["Controlability", "se"], digits = 2)`) and the *Random* condition (*M* =
+`r round(Mean_RT_Ctrbillity["Random", "mean"], digits = 0)` ms,
+*SE* = `r round(Mean_RT_Ctrbillity["Random", "se"], digits = 2)`), after controlling for learning effects across trials (*b* = `r round(coefs_RT_ModFinal_02_Ctrbillity["Counting_Trial", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_ModFinal_02_Ctrbillity, type = "ml1")[["Counting_Trial"]], digit =0)`) =
+`r round(coefs_RT_ModFinal_02_Ctrbillity["Counting_Trial", "t.value"], digits = 2)`, *p* `r  pValue(coefs_RT_ModFinal_02_Ctrbillity["Counting_Trial", "Pr...t.."])`).
+Additionally, the analysis reveals no significant interaction between *Controllability* and other variables:
+(interaction (*Controllability* × *Validity*): *b* = `r round(coefs_RT_ModFinal_02_Ctrbillity["Validity_C:Controllability_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_ModFinal_02_Ctrbillity, type = "ml1")[["Validity_C:Controllability_C"]], digit =0)`) =
+`r round(coefs_RT_ModFinal_02_Ctrbillity["Validity_C:Controllability_C", "t.value"], digits = 2)`, *p* `r  pValue(coefs_RT_ModFinal_02_Ctrbillity["Validity_C:Controllability_C", "Pr...t.."])`; 
+interaction (*Controllability* × *Congruency*): *b* = `r round(coefs_RT_ModFinal_02_Ctrbillity["Congruency_C:Controllability_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_ModFinal_02_Ctrbillity, type = "ml1")[["Congruency_C:Controllability_C"]], digit =0)`) =
+`r round(coefs_RT_ModFinal_02_Ctrbillity["Congruency_C:Controllability_C", "t.value"], digits = 2)`, *p* `r  pValue(coefs_RT_ModFinal_02_Ctrbillity["Congruency_C:Controllability_C", "Pr...t.."])`; 
+3-way interaction (*Controllability* × *Validity* × *Congruency*): *b* = `r round(coefs_RT_ModFinal_02_Ctrbillity["Congruency_C:Validity_C:Controllability_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_ModFinal_02_Ctrbillity, type = "ml1")[["Congruency_C:Validity_C:Controllability_C"]], digit =0)`) =
+`r round(coefs_RT_ModFinal_02_Ctrbillity["Congruency_C:Validity_C:Controllability_C", "t.value"], digits = 2)`, *p* `r  pValue(coefs_RT_ModFinal_02_Ctrbillity["Congruency_C:Validity_C:Controllability_C", "Pr...t.."])`). 
+
+The absence of a significant 3-way interaction in response times challenges the hypothesis that a sense of control over a threat enhances attentional selectivity compared to an uncontrollable threat^[When data from the *Threat* and *Vocalize* blocks were combined, the 3-way interaction (*Controllability* × *Validity* × *Congruency*) also remained non-significant: *b* = `r round(coefs_RT_ModFinal_02_Ctrbillity_ThTo["Congruency_C:Validity_C:Controllability_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_ModFinal_02_Ctrbillity_ThTo, type = "ml1")[["Congruency_C:Validity_C:Controllability_C"]], digit =0)`) =
+`r round(coefs_RT_ModFinal_02_Ctrbillity_ThTo["Congruency_C:Validity_C:Controllability_C", "t.value"], digits = 2)`, *p* `r  pValue(coefs_RT_ModFinal_02_Ctrbillity_ThTo["Congruency_C:Validity_C:Controllability_C", "Pr...t.."])`.]. 
+However, equivalence testing does not allow us to conclude the equivalence of the 3-way interaction using an non-standardized SESOI of 9.76 ms (*t*(`r rounding2(lower_RT_Ctrbillity$df)`) = `r rounding2(lower_RT_Ctrbillity$'t value') `, *p* `r pValue(lower_RT_Ctrbillity$'Pr(>|t|)'/2)`).
+
+
+
+Regarding response accuracy, the main effect of controllability is also non-significant (*b* = `r round(coefs_Accuracy_ModFinal_Ctrbillity["Controllability_C", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Accuracy_ModFinal_Ctrbillity, type = "ml1")[["Controllability_C"]], digit =0)`) =
+`r round(coefs_Accuracy_ModFinal_Ctrbillity["Controllability_C", "z.value"], digits = 2)`, *p* `r  pValue(coefs_Accuracy_ModFinal_Ctrbillity["Controllability_C", "Pr...z.."])`). 
+Furthermore, this variable shows no significant interaction with cue validity (*b* = `r round(coefs_Accuracy_ModFinal_Ctrbillity["Validity_C:Controllability_C", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Accuracy_ModFinal_Ctrbillity, type = "ml1")[["Validity_C:Controllability_C"]], digit =0)`) =
+`r round(coefs_Accuracy_ModFinal_Ctrbillity["Validity_C:Controllability_C", "z.value"], digits = 2)`, *p* `r  pValue(coefs_Accuracy_ModFinal_Ctrbillity["Validity_C:Controllability_C", "Pr...z.."])`) or cue congruency (*b* = `r round(coefs_Accuracy_ModFinal_Ctrbillity["Congruency_C:Controllability_C", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Accuracy_ModFinal_Ctrbillity, type = "ml1")[["Congruency_C:Controllability_C"]], digit =0)`) =
+`r round(coefs_Accuracy_ModFinal_Ctrbillity["Congruency_C:Controllability_C", "z.value"], digits = 2)`, *p* `r  pValue(coefs_Accuracy_ModFinal_Ctrbillity["Congruency_C:Controllability_C", "Pr...z.."])`). 
+The 3-way interaction is also non-significant in this study (*b* = `r round(coefs_Accuracy_ModFinal_Ctrbillity["Congruency_C:Validity_C:Controllability_C", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Accuracy_ModFinal_Ctrbillity, type = "ml1")[["Congruency_C:Validity_C:Controllability_C"]], digit =0)`) =
+`r round(coefs_Accuracy_ModFinal_Ctrbillity["Congruency_C:Validity_C:Controllability_C", "z.value"], digits = 2)`, *p* `r  pValue(coefs_Accuracy_ModFinal_Ctrbillity["Congruency_C:Validity_C:Controllability_C", "Pr...z.."])`)^[When data from the *Threat* and *Vocalize* blocks are combined, the 3-way interaction (*Controllability* × *Validity* × *Congruency*) on response accuracy is also non-significant: *b* = `r round(coefs_Accuracy_ModFinal_ThTo_Ctrbillity["Congruency_C:Validity_C:Controllability_C", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Accuracy_ModFinal_ThTo_Ctrbillity, type = "ml1")[["Congruency_C:Validity_C:Controllability_C"]], digit =0)`) =
+`r round(coefs_Accuracy_ModFinal_ThTo_Ctrbillity["Congruency_C:Validity_C:Controllability_C", "z.value"], digits = 2)`, *p* `r  pValue(coefs_Accuracy_ModFinal_ThTo_Ctrbillity["Congruency_C:Validity_C:Controllability_C", "Pr...z.."])`]. 
+This analysis shows a marginal effect of trial number, suggesting that participants make progressively fewer errors as the task progresses (*b* = `r round(coefs_Accuracy_ModFinal_Ctrbillity["Counting_Trial", "Estimate"], digits = 3)`,
+*Z*(`r round(get_df(Accuracy_ModFinal_Ctrbillity, type = "ml1")[["Counting_Trial"]], digit =0)`) =
+`r round(coefs_Accuracy_ModFinal_Ctrbillity["Counting_Trial", "z.value"], digits = 2)`, *p* `r  pValue(coefs_Accuracy_ModFinal_Ctrbillity["Counting_Trial", "Pr...z.."])`).
+
+
+
+### Exploratory analyses
+
+Beyond the effect of *Controllability*, additional analyses were conducted to verify whether the results of this study replicated the threat effects obtained in Studies 1 and 2. 
+For this purpose, data from the *Threat* and *Vocalize* blocks were combined to analyze the effect of sound occurrences on attentional capture^[This study once again shows no significant 3-way interaction (*Condition* × *Validity* × *Congruency*) when comparing the *Threat* and *Vocalize* blocks, both for response times (*b* = `r round(coefs_RT_ModFinal_SoundComp_02["Congruency_C:Validity_C:Sound_Type", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_ModFinal_SoundComp_02, type = "ml1")[["Congruency_C:Validity_C:Sound_Type"]], digit =0)`) =
+`r round(coefs_RT_ModFinal_SoundComp_02["Congruency_C:Validity_C:Sound_Type", "t.value"], digits = 2)`, *p* `r  pValue(coefs_RT_ModFinal_SoundComp_02["Congruency_C:Validity_C:Sound_Type", "Pr...t.."])`) and accuracy (*b* = `r round(coefs_Accuracy_ModFinal_SoundComp["Congruency_C:Validity_C:Sound_Type", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Accuracy_ModFinal_SoundComp, type = "ml1")[["Congruency_C:Validity_C:Sound_Type"]], digit =0)`) =
+`r round(coefs_Accuracy_ModFinal_SoundComp["Congruency_C:Validity_C:Sound_Type", "z.value"], digits = 2)`, *p* `r  pValue(coefs_Accuracy_ModFinal_SoundComp["Congruency_C:Validity_C:Sound_Type", "Pr...z.."])`). Moreover, an equivalence test on response times indicates that the impact of different sounds on contingent capture is significantly smaller than a non-standardized effect size of 9.76 ms (*t*(`r rounding2(lower_SoundComp$df)`) = `r rounding2(lower_SoundComp$'t value') `, *p* `r pValue(lower_SoundComp$'Pr(>|t|)'/2)`).]. 
+The mixed models used to test these effects were identical to those in Study 2 and trial number was included in the models to control for the absence of block counterbalancing.
+
+
+The analysis of response times revealed no significant 3-way interaction (*b* = `r round(coefs_RT_ModFinal_ThTo_02["Congruency_C:Validity_C:Sounds_Presence_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_ModFinal_ThTo_02, type = "ml1")[["Congruency_C:Validity_C:Sounds_Presence_C"]], digit =0)`) =
+`r round(coefs_RT_ModFinal_ThTo_02["Congruency_C:Validity_C:Sounds_Presence_C", "t.value"], digits = 2)`, *p* `r  pValue(coefs_RT_ModFinal_ThTo_02["Congruency_C:Validity_C:Sounds_Presence_C", "Pr...t.."])`). 
+This interaction effect was also not significant in the analysis of response accuracy (*b* = `r round(coefs_Accuracy_ModFinal_ThTo["Congruency_C:Validity_C:Sounds_Presence_C", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Accuracy_ModFinal_ThTo, type = "ml1")[["Congruency_C:Validity_C:Sounds_Presence_C"]], digit =0)`) =
+`r round(coefs_Accuracy_ModFinal_ThTo["Congruency_C:Validity_C:Sounds_Presence_C", "z.value"], digits = 2)`, *OR* = `r round(OR_Accuracy_ModFinal_ThTo["Congruency_C:Validity_C:Sounds_Presence_C", "estimate"], digits = 2)`, IC à 95% [`r round(OR_Accuracy_ModFinal_ThTo["Congruency_C:Validity_C:Sounds_Presence_C", "conf.low"], digits = 2)`, `r round(OR_Accuracy_ModFinal_ThTo["Congruency_C:Validity_C:Sounds_Presence_C", "conf.high"], digits = 2)`], *p* `r  pValue(coefs_Accuracy_ModFinal_ThTo["Congruency_C:Validity_C:Sounds_Presence_C", "Pr...z.."])`).
+
+
+
+## Discussion 
+
+
+In this third study, we aimed to test the hypothesis that the enhancement of attentional selectivity might depend on the level of control individuals perceive over a threat. 
+To this end, the occurrence of aversive sounds was presented to be either random or performance-linked. 
+Participants in the *Controllable* condition believed they had perceived instrumental control [@millerControllabilityHumanStress1979], unlike those in the *Random* condition.
+Contrary to our hypothesis, the results did not show that attentional selectivity was influenced by the controllability of the threat. 
+Specifically, the contingent capture effect was similar between the two conditions: participants who thought they had control over the occurrence of the aversive sounds did not show different attentional selectivity compared to those who believed the sounds were entirely random.
+Although an equivalence test (SESOI = 9.76 ms) was not significant, the results suggest that the controllability of the threat has minimal influence on how individuals select relevant information in their environment. 
+
+
+However, the effectiveness of controllability manipulation can be questioned in this study. 
+Although participants in the *Controllable* condition reported higher perceived control over the threat compared to participants in the *Random* condition, a substantial number of participants in the *Controllable* condition still believed that chance played a significant role in the occurrence of distress screams.
+The limited effectiveness of our controllability manipulation is evident in the relatively low mean level of perceived control reported by participants in this condition (i.e., *M* = `r rounding2(SenseOfControl_table_Ctrbillity[[1,"Mean"]])`, *SD* = `r rounding2(SenseOfControl_table_Ctrbillity[[1,"SD"]])`, on a 10-point scale)
+Research on perceived instrumental control suggests that when participants realize that their control is ineffective in limiting the impact of the threat, the manipulation of controllability no longer effectively reduces anticipatory stress [@glassPerceivedControlAversive1973; @millerControllabilityHumanStress1979]. 
+In our study, the occurrence of the screams was identical for all participants and followed a pre-determined sequence. Consequently, the lack of actual contingency between the occurrence of the screams and participants' performance might have led some participants to conclude that the screams were not dependent on their actions.
+
+
+To address this limitation, it could be interesting to replicate this study using actual instrumental control rather than perceived control. 
+The main advantage of the perceived instrumental control procedure is that it exposes participants in both the *controllable* and *uncontrollable* conditions to the same aversive events, maintaining all threat parameters constant [@crombezItBetterHave2008; @salomonsPerceivedControllabilityModulates2004; @thompsonWillItHurt1981]. 
+However, the lack of real control over the threat can limit participants' belief in the controllability of the threat.
+A task in which the occurrence of distress screams is genuinely dependent on performance in the primary task would thus help mitigate the low level of perceived control measured in our study. 
+Even though actual instrumental control may not allow for an identical number of sounds to be heard by each participant, such a study would provide additional insights into exploring the effects of controllability on attentional selectivity.
+
+
+
+
+# Supplementary
+
+## Supplementary : Study 3 {#Supplementary-Study-3}
+
+### Population
+
+Unlike the first two studies, which used an unstandardized effect size of -4.88 ms, this third study employed an effect size of -8.20 ms. To estimate the unstandardized effect size for the 3-way interaction in Studies 1 and 2, a single sample was simulated based on the means and standard deviations from the unpublished study by @normandDoesEvaluativePressure2014. In Study 3, by contrast, we simulated 1,000 samples to better estimate the interaction effect size. The unstandardized effect size of -8.20 ms represents the average fixed effect for the three-way interaction across these 1,000 simulated samples.
+
+
+# Etude 3 : Manipulation de la contrôlabilité de la menace {#Annexe-Etude-3-Consignes}
+
+## Condition menace *contrôlable*
+
+Vous allez maintenant réaliser à nouveau la tâche que vous venez
+d'effectuer. Toutefois, cette fois-ci, des cris tels que celui que vous
+venez d'entendre sont susceptibles d'être entendus lors de la tâche.
+
+De plus, votre performance sera mesurée tout au long des prochains
+essais. A chaque réponse que vous donnez, un algorithme évalue votre
+performance. Votre performance est considérée comme satisfaisante si
+vous avez répondu correctement et rapidement. L’algorithme évalue
+également votre progression au fur et à mesure des essais. Si vous ne
+progressez pas du tout ou pas suffisamment, votre performance n’est pas
+considérée comme satisfaisante.
+
+Dès lors qu'une performance peu satisfaisante est détectée, vous
+entendrez des cris. Les cris que vous entendez sont là pour vous
+signaler que votre performance n’est pas satisfaisante.
+
+A l’inverse, si votre performance est satisfaisante, vous n'entendrez
+que peu ou pas de cris du tout.
+
+Placez vos doigts sur les touche Y, G, H et B de votre clavier. Gardez
+toujours votre regard fixé sur le carré blanc au centre de l'écran et ne
+modifiez pas le son de votre ordinateur.
+
+Souvenez-vous que votre performance sera mesurée lors des prochains
+essais. Celle-ci se base sur votre vitesse, vos erreurs et votre taux de
+progression.
+
+**Plus votre performance sera faible, plus vous entendrez des cris lors
+de la réalisation de la tâche. Plus votre performance sera élevée, moins
+vous entendrez de cris lors de la réalisation de la tâche.**
+
+## Condition menace *aléatoire*
+
+Vous allez maintenant réaliser à nouveau la tâche que vous venez
+d'effectuer. Toutefois, cette fois-ci, des cris tels que celui que vous
+venez d'entendre sont susceptibles d'être entendus à n'importe quel
+moment lors de la tâche.
+
+De plus, votre performance sera mesurée tout au long des prochains
+essais. A chaque réponse que vous donnez, un algorithme évalue votre
+performance. Votre performance est considérée comme satisfaisante si
+vous avez répondu correctement et rapidement. L’algorithme évalue
+également votre progression au fur et à mesure des essais. Si vous ne
+progressez pas du tout ou pas suffisamment, votre performance n’est pas
+considérée comme satisfaisante.
+
+Lors des prochains essais, bien que votre performance soit mesurée, cela
+n'aura aucun impact sur la fréquence des cris lors de la tâche. Ceux-ci
+sont entendus de façon aléatoire, à n'importe quel moment lors des
+essais. Ainsi, deux participant.e.s n'entendront jamais les cris au même
+moment lors de la réalisation de cette expérience.
+
+Placez vos doigts sur les touche Y, G, H et B de votre clavier. Gardez
+toujours votre regard fixé sur le carré blanc au centre de l'écran et ne
+modifiez pas le son de votre ordinateur.
+
+Souvenez-vous que votre performance sera mesurée lors des prochains
+essais. Celle-ci se base sur votre vitesse, vos erreurs et votre taux de
+progression.
+
+**De plus, des cris seront entendus de manière aléatoire lors de la
+tâche. Ainsi, votre performance n'aura aucun impact sur la survenue des
+cris.**
+
+
+
+### Results 
+
+#### Effectiveness of Anxiety induction
+
+As in the earlier studies, anxiety reported after the Threat block was significantly higher than at the beginning of the experiment (*b* =
+`r round(Report_Evol_lm01_Ctrbillity$coefficients[1,1], digits = 2)`,
+*F*(`r Report_Evol_lm01_Ctrbillity$df[1]`, `r Report_Evol_lm01_Ctrbillity$df[2]`) =
+`r round(Report_Evol_lm01_Ctrbillity$coefficients[1,3], digits = 2)`, *p* `r pValue(Report_Evol_lm01_Ctrbillity$coefficients[1,4])`). No significant increase in initial anxiety was observed in the *Control* and *Vocalize* blocks (respectively *b* =
+`r round(Report_Evol_lm02_Ctrbillity$coefficients[1,1], digits = 2)`,
+*F*(`r Report_Evol_lm02_Ctrbillity$df[1]`, `r Report_Evol_lm02_Ctrbillity$df[2]`) =
+`r round(Report_Evol_lm02_Ctrbillity$coefficients[1,3], digits = 2)`, *p* `r pValue(Report_Evol_lm02_Ctrbillity$coefficients[1,4])` et *b* = `r round(Report_Evol_lm03_Ctrbillity$coefficients[1,1], digits = 2)`,
+*F*(`r Report_Evol_lm03_Ctrbillity$df[1]`, `r Report_Evol_lm03_Ctrbillity$df[2]`) =
+`r round(Report_Evol_lm03_Ctrbillity$coefficients[1,3], digits = 2)`, *p* `r pValue(Report_Evol_lm03_Ctrbillity$coefficients[1,4])`).
+
+Once again, participants rated the screams as significantly more threatening (*M* =
+`r round(mean(df_Survey_Wide_Ctrbillity$Threat_Scream_Mean), digit = 2)`, *ET* =
+`r round(sd(df_Survey_Wide_Ctrbillity$Threat_Scream_Mean), digit = 2)`) than the vocalizations (*M* =
+`r round(mean(df_Survey_Wide_Ctrbillity$Threat_Vocal_Mean), digit = 2)`, *ET* =
+`r round(sd(df_Survey_Wide_Ctrbillity$Threat_Vocal_Mean), digit = 2)`, *b* =
+`r round(Report_Threatening_Sounds_Ctrbillity$coefficients[1,1], digits = 2)`,
+*F*(`r Report_Threatening_Sounds_Ctrbillity$df[1]`, `r Report_Threatening_Sounds_Ctrbillity$df[2]`) =
+`r round(Report_Threatening_Sounds_Ctrbillity$coefficients[1,3], digits = 2)`, *p* `r pValue(Report_Threatening_Sounds_Ctrbillity$coefficients[1,4])`).
+Additionally, the perceived threatening nature of screams and vocalizations significantly predicted the increase in self-reported anxiety during the *Threat* block (*b* = `r round(Report_Anxiety_Screams_lmMean_Ctrbillity$coefficients[2,1], digits = 2)`,
+*F*(`r Report_Anxiety_Screams_lmMean_Ctrbillity$df[1]-Report_Anxiety_Screams_lmMean_Ctrbillity[["fstatistic"]][["numdf"]]`, `r Report_Anxiety_Screams_lmMean_Ctrbillity$df[2]`) =
+`r round(Report_Anxiety_Screams_lmMean_Ctrbillity$coefficients[2,3], digits = 2)`, *p* `r pValue(Report_Anxiety_Screams_lmMean_Ctrbillity$coefficients[2,4])`, η² = `r round(rsq(Anxiety_Screams_lmMean_Ctrbillity), digit = 3)`) and the Vocalise block (*b* = `r round(Report_Anxiety_Vocaliz_lmMean_Ctrbillity$coefficients[2,1], digits = 2)`,
+*F*(`r Report_Anxiety_Vocaliz_lmMean_Ctrbillity$df[1]-Report_Anxiety_Vocaliz_lmMean_Ctrbillity[["fstatistic"]][["numdf"]]`, `r Report_Anxiety_Vocaliz_lmMean_Ctrbillity$df[2]`) =
+`r round(Report_Anxiety_Vocaliz_lmMean_Ctrbillity$coefficients[2,3], digits = 2)`, *p* `r pValue(Report_Anxiety_Vocaliz_lmMean_Ctrbillity$coefficients[2,4])`, η² = `r round(rsq(Anxiety_Vocaliz_lmMean_Ctrbillity), digit = 3)`).
+
+
+
+#### Contingent capture effect
+
+Regarding response times, our analyses reveal a main effect of cue validity (*b* = `r round(coefs_RT_ModFinal_02_Ctrbillity["Validity_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_ModFinal_02_Ctrbillity, type = "ml1")[["Validity_C"]], digit =0)`) =
+`r round(coefs_RT_ModFinal_02_Ctrbillity["Validity_C", "t.value"], digits = 2)`, *p* `r pValue(coefs_RT_ModFinal_02_Ctrbillity["Validity_C", "Pr...t.."])`). 
+However, unlike the first two studies, our results do not show a main effect of congruency on response times (*b* = `r round(coefs_RT_ModFinal_02_Ctrbillity["Congruency_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_ModFinal_02_Ctrbillity, type = "ml1")[["Congruency_C"]], digit =0)`) =
+`r round(coefs_RT_ModFinal_02_Ctrbillity["Congruency_C", "t.value"], digits = 2)`, *p* `r pValue(coefs_RT_ModFinal_02_Ctrbillity["Congruency_C", "Pr...t.."])`).
+The analyses also reveal a significant interaction between cue *Congruency* and *Validity* (*b* = `r round(coefs_RT_ModFinal_02_Ctrbillity["Congruency_C:Validity_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_ModFinal_02_Ctrbillity, type = "ml1")[["Congruency_C:Validity_C"]], digit =0)`) =
+`r round(coefs_RT_ModFinal_02_Ctrbillity["Congruency_C:Validity_C", "t.value"], digits = 2)`, *p* `r  pValue(coefs_RT_ModFinal_02_Ctrbillity["Congruency_C:Validity_C", "Pr...t.."])`), suggesting that the cuing effect is stronger in congruent trials (*b* = `r round(coefs_RT_SimpEffect_Cong["Validity_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_SimpEffect_Cong, type = "ml1")[["Validity_C"]], digit =0)`) =
+`r round(coefs_RT_SimpEffect_Cong["Validity_C", "t.value"], digits = 2)`, *p* `r  pValue(coefs_RT_SimpEffect_Cong["Validity_C", "Pr...t.."])`) than in incongruent trials (*b* = `r round(coefs_RT_SimpEffect_Incong["Validity_C", "Estimate"], digits = 2)`,
+*t*(`r round(get_df(RT_SimpEffect_Incong, type = "ml1")[["Validity_C"]], digit =0)`) =
+`r round(coefs_RT_SimpEffect_Incong["Validity_C", "t.value"], digits = 2)`, *p* `r  pValue(coefs_RT_SimpEffect_Incong["Validity_C", "Pr...t.."])`. 
+
+```{r FigureContingentCapture-LocStd2, fig.cap = "(ref:Title-FigureContingentCapture-LocStd2)", fig.align = 'center', echo=FALSE, warning=FALSE, include=TRUE}
+
+# APA Style Line Graph with a Single Legend for Congruency
+ggplot(Mean_RT_Contingent_Capture, aes(x = Cueing_Validity, y = mean, color = Congruency, linetype = Congruency, group = Congruency)) +
+  
+  # Points and Error Bars
+  geom_point(position = position_dodge(width = 0.2), size = 2) +  # Larger point size for clarity
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se), width = 0.1, position = position_dodge(width = 0.2), size = 0.8) +  # Error bars with proper width
+  
+  # Line
+  geom_line(position = position_dodge(width = 0.2), size = 1) +  # Slightly thicker lines for APA clarity
+  
+  # Labels for X and Y axis
+  xlab("Cueing Validity") +
+  ylab("Response Time (in milliseconds)") +
+  
+  # Custom X-axis labels
+  scale_x_discrete(limits = c("Valid", "Invalid"), 
+                   labels = c("Valid", "Invalid")) +
+  
+  # Custom color and linetype scale, with combined legend
+  scale_color_manual(
+    values = c("green4", "red", "black"),  # Custom colors for the legend
+    labels = c("Congruent", "Incongruent", "No Cue")  # Custom labels
+  ) +
+  
+  # Custom linetype scale (linked to same variable)
+  scale_linetype_manual(
+    values = c("solid", "solid", "dashed"),  # Linetypes
+    labels = c("Congruent", "Incongruent", "No Cue")  # Ensure labels match color legend
+  ) +
+  
+  # Combine the color and linetype legends into one
+  guides(
+    color = guide_legend(title = "Cueing Congruency", 
+                         override.aes = list(linetype = c("solid", "solid", "dashed"))),
+    linetype = "none"  # Hide the separate linetype legend
+  ) +
+  
+  # APA style theme adjustments
+  theme(legend.position = "top",             # Remove legend 
+        panel.grid.major = element_blank(),   # Remove grid lines
+        panel.grid.minor = element_blank(),   # Remove minor grid lines
+        axis.line = element_line(size = 0.5, color = "black") # Add axis lines for clarity
+  )
+
+```
+
+(ref:Title-FigureContingentCapture-LocStd2) **Study 3: Involuntary contingent capture of attention on response Times**.  
+
+
+Regarding response accuracy, the analyses indicate a main effect of cue validity (*b* = `r round(coefs_Accuracy_ModFinal_Ctrbillity["Validity_C", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Accuracy_ModFinal_Ctrbillity, type = "ml1")[["Validity_C"]], digit =0)`) =
+`r round(coefs_Accuracy_ModFinal_Ctrbillity["Validity_C", "z.value"], digits = 2)`, *p* `r  pValue(coefs_Accuracy_ModFinal_Ctrbillity["Validity_C", "Pr...z.."])`) and a main effect of cue congruency (*b* = `r round(coefs_Accuracy_ModFinal_Ctrbillity["Congruency_C", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Accuracy_ModFinal_Ctrbillity, type = "ml1")[["Congruency_C"]], digit =0)`) =
+`r round(coefs_Accuracy_ModFinal_Ctrbillity["Congruency_C", "z.value"], digits = 2)`, *p* `r  pValue(coefs_Accuracy_ModFinal_Ctrbillity["Congruency_C", "Pr...z.."])`). 
+In this study, the interaction between cue *Validity* and *Congruency* is only marginal (*b* = `r round(coefs_Accuracy_ModFinal_Ctrbillity["Congruency_C:Validity_C", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Accuracy_ModFinal_Ctrbillity, type = "ml1")[["Congruency_C:Validity_C"]], digit =0)`) =
+`r round(coefs_Accuracy_ModFinal_Ctrbillity["Congruency_C:Validity_C", "z.value"], digits = 2)`, *p* `r  pValue(coefs_Accuracy_ModFinal_Ctrbillity["Congruency_C:Validity_C", "Pr...z.."])`). 
+Nonetheless, this effect aligns with the hypothesis of contingent attentional capture: the effect of validity on response accuracy is greater in congruent trials (*b* = `r round(coefs_Accuracy_SimpEffect_Cong_Ctrbillity["Validity_C", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Accuracy_SimpEffect_Cong_Ctrbillity, type = "ml1")[["Validity_C"]], digit =0)`) =
+`r round(coefs_Accuracy_SimpEffect_Cong_Ctrbillity["Validity_C", "z.value"], digits = 2)`, *p* `r  pValue(coefs_Accuracy_SimpEffect_Cong_Ctrbillity["Validity_C", "Pr...z.."])`) than in incongruent trials (*b* = `r round(coefs_Accuracy_SimpEffect_Incong_Ctrbillity["Validity_C", "Estimate"], digits = 2)`,
+*Z*(`r round(get_df(Accuracy_SimpEffect_Incong_Ctrbillity, type = "ml1")[["Validity_C"]], digit =0)`) =
+`r round(coefs_Accuracy_SimpEffect_Incong_Ctrbillity["Validity_C", "z.value"], digits = 2)`, *p* `r  pValue(coefs_Accuracy_SimpEffect_Incong_Ctrbillity["Validity_C", "Pr...z.."])`). 
+
+
+
+#### General Model Parameters for Response Time
+
+
+In this study, the selected model for predicting response times explained `r round((perf_RT_ModFinal_02_Ctrbillity[1, "R2_conditional"]*100), digits = 1)`% of the variance in the data. 
+The contributions of random effects and fixed effects were `r round((perf_RT_ModFinal_02_Ctrbillity[1, "ICC"]*100), digits = 1)`% and `r round((perf_RT_ModFinal_02_Ctrbillity[1, "R2_marginal"]*100), digits = 1)`%, respectively. 
+In these analyses, the thresholds for data outlier removal correspond to lever values greater than 0.023 and Cook's distances greater than 0.020. 
+The final dataset consists of *k* = `r nrow(df_Ctrbillity_Threat_Prereg_Excl_RT_Out)` trials.
+
+
+#### General Model Parameters for Accuracy
+
+With respect to response accuracy, the random slope of *Validity* for the factor `Item` was removed because including this random term caused singularity issues in the model. 
+Overall, the selected model explained `r round((perf_Accuracy_ModFinal_Ctrbillity[1, "R2_conditional"]*100), digits = 1)`% of the variance in the data. 
+Random effects and fixed effects respectively accounted for `r round((perf_Accuracy_ModFinal_Ctrbillity[1, "ICC"]*100), digits = 1)`% and `r round((perf_Accuracy_ModFinal_Ctrbillity[1, "R2_marginal"]*100), digits = 1)`% of the data variability. 
+In these analyses, the thresholds for data outlier removal correspond to lever values greater than 0.65 and Cook's distances greater than 0.90. The final dataset consists of *k* = `r nrow(df_Ctrbillity_Threat_Prereg_Excl_Acc_Out)` trials.
+
+
+#### Exploratory analyses: General Model Parameters for Response Times
+
+To analyze the influence of sound occurrence on response times, the final dataset included *k* = `r nrow(df_LocStd2_ThTo_Prereg_Excl_Out)` trials. 
+Our analyses reveal that `r round((perf_RT_ModFinal_ThTo_02[1, "R2_conditional"]*100), digits = 1)`% of the total variance in the data is explained by our model, which includes both fixed and random effects. Furthermore, `r round((perf_RT_ModFinal_ThTo_02[1, "ICC"]*100), digits = 1)`% of the variance is explained by the random effects, while `r round((perf_RT_ModFinal_ThTo_02[1, "R2_marginal"]*100), digits = 1)`% is explained by the fixed effects.
+In these analyses, the thresholds for data outlier removal correspond to lever values greater than 0.037 and Cook's distances greater than 0.030.
+
+
+#### Exploratory analyses: General Model Parameters for Acccuracy
+
+The final dataset used to analyze the influence of sound occurrence on response accuracy consists of *k* = `r nrow(df_LocStd2_ThTo_Prereg_Excl_Acc_Out)` trials. 
+In these analyses, the thresholds for data outlier removal correspond to lever values greater than 0.50 and Cook's distances greater than 0.90.
+
+#### Limitation of controllability induction
+
+The limited effectiveness of our controllability manipulation is evident in the relatively low mean level of perceived control reported by participants in this condition (i.e., *M* = `r rounding2(SenseOfControl_table_Ctrbillity[[1,"Mean"]])`, *SD* = `r rounding2(SenseOfControl_table_Ctrbillity[[1,"SD"]])`, on a 10-point scale), as well as the large proportion of participants who did not perceive significant control over the occurrence of the screams. 
+Figure \@ref(fig:FigureControlabillity-ByCondition) shows that participants in both the *Random* and *Controllable* conditions differed only slightly in their judgments of the controllability of the threat.
+
+```{r FigureControlabillity-ByCondition, fig.cap = "(ref:Title-FigureControlabillity-ByCondition)", fig.align = 'center', echo=FALSE, warning=FALSE}
+
+df_Survey_Wide_Ctrbillity %>%
+  ggplot(aes(x = Check_Controlability_Mean, fill = Task_Type_str)) +
+  geom_density(color = "black", alpha = 0.7, position = 'identity', size = 0.5) +
+  scale_fill_manual(values = c("#00BFC4", "#F8766D"),
+                    labels = c("Controllable Threat", "Random Threat")) +
+  labs(
+    x = "Assessment of threat controllability",
+    y = "Density",
+    fill = "Experimental Condition"  # Main legend title
+  ) +
+  
+    # APA style theme adjustments
+  theme(legend.position = c(0.85, 0.85),      # Position legend in the top right corner
+        legend.box = "vertical",  # Arrange legend items vertically
+        panel.grid.major = element_blank(),   # Remove grid lines
+        panel.grid.minor = element_blank(),   # Remove minor grid lines
+        axis.line = element_line(size = 0.5, color = "black") # Add axis lines for clarity
+        ) +
+  guides(fill = guide_legend(title.position = "top", title.hjust = 0.5)) # Center title over the items
+
+
+```
+
+(ref:Title-FigureControlabillity-ByCondition) **Density plot of threat controllability as a function of experimental condition**.
